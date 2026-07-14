@@ -45,6 +45,10 @@ export function loadTrackedConfig(configPath: string): TrackedConfig {
   return parsed;
 }
 
+export function saveTrackedConfig(configPath: string, config: TrackedConfig): void {
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
+}
+
 export function resolveRepoPaths(config: TrackedConfig, configPath: string): ResolvedRepoConfig[] {
   const configDir = path.dirname(configPath);
   return config.repos.map((repo) => ({

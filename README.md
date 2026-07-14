@@ -26,10 +26,10 @@ desde o desenho:
 - **Selecionar pessoas e repositórios** é de primeira classe: por flag de
   CLI na coleta (`--people`, `--repos`) e por checkboxes no próprio
   dashboard (filtra o gráfico/tabela sem precisar rodar de novo).
-- **Adicionar/remover um dev do time é um comando, não uma edição manual de
-  JSON** (`npm run people -- add/remove/list`), e `npm run discover` acha
-  identidades de commit/PR que ainda não batem com ninguém cadastrado — ver
-  seção "Adicionar ou remover um dev" abaixo.
+- **Adicionar/remover um dev do time é um clique num painel (`npm run ui`)
+  ou um comando** (`npm run people -- add/remove/list`), nunca uma edição
+  manual de JSON — e `npm run discover` (ou a aba "Descobrir" do painel)
+  acha identidades de commit/PR que ainda não batem com ninguém cadastrado.
 
 QA e Funcional foram deliberadamente deixados de fora desta rodada — a
 versão anterior tinha personas simuladas para provar o layout visual, mas
@@ -109,9 +109,38 @@ repositório é cara, as próximas só analisam commits novos. Numa rodada
 local de teste, `gd-crm-poc` (7 commits) caiu de ~90s para ~4s na segunda
 execução.
 
+## Painel visual (`npm run ui`)
+
+```bash
+npm run ui
+# abre http://localhost:4173
+```
+
+Um painel local (servidor Node + tela no navegador, sem dependências de
+frontend) com três abas:
+
+- **Pessoas** — lista quem está cadastrado, com chips removíveis por
+  identidade (git e GitHub) e um botão "Remover pessoa"; formulário de
+  "+ Adicionar pessoa" pra cadastrar sem tocar em JSON.
+- **Descobrir** — roda a mesma varredura do `npm run discover`, mas em vez
+  de imprimir comando pra copiar, cada identidade não mapeada vira uma linha
+  com um seletor (pessoa existente ou "+ nova pessoa") e um botão
+  "Vincular" — um clique em vez de copiar/colar.
+- **Análise** — checkboxes de pessoas/repositórios + botão "Rodar análise",
+  com a saída do processo (o mesmo `npm run analyze`) transmitida ao vivo
+  num painel estilo terminal. Ao terminar, tem um link direto pro
+  `/dashboard` (o mesmo `dist/dashboard.html` de sempre).
+
+Tudo isso conversa com o mesmo `config/tracked.json` e os mesmos scripts
+(`src/peopleService.ts`, `src/discoverService.ts`, `src/index.ts`) usados
+pela CLI — a tela é só mais uma forma de acionar o mesmo motor, não um
+caminho paralelo. `npm run people` e `npm run discover` continuam
+funcionando normalmente pra quem preferir terminal.
+
 ## Adicionar ou remover um dev
 
-Editar `config/tracked.json` na mão funciona, mas erra fácil (duplicar id,
+Pelo painel (`npm run ui` → aba **Pessoas**) ou por linha de comando —
+editar `config/tracked.json` na mão funciona, mas erra fácil (duplicar id,
 esquecer um email, JSON inválido). Os comandos abaixo cuidam disso:
 
 ```bash
@@ -178,11 +207,15 @@ sentir que alguém "sumiu" do dashboard.
 
 ```
 config/tracked.json               pessoas, identidades git, repositórios rastreados
+ui/app.html                       painel visual (SPA estática, servida pelo server.ts)
 src/
-  config.ts                       carrega config, resolve identidade, filtros de CLI
+  server.ts                       servidor HTTP local (npm run ui) - API + painel
+  peopleService.ts                add/remove pessoa e identidades - usado por CLI e painel
+  discoverService.ts              varredura de identidades não mapeadas - usado por CLI e painel
+  config.ts                       carrega/salva config, resolve identidade, filtros de CLI
   cache.ts                        cache incremental de análise de código por commit (data/cache/)
-  cli/people.ts                    npm run people -- list/add/remove
-  cli/discover.ts                  npm run discover - acha identidades não mapeadas nos repos
+  cli/people.ts                    npm run people -- list/add/remove (fino sobre peopleService)
+  cli/discover.ts                  npm run discover (fino sobre discoverService)
   collectors/gitCollector.ts       git log --numstat -> commits com personId resolvido
   collectors/githubPrCollector.ts  gh api -> PRs com personId resolvido (tolerante a repo sem PR)
   analyzers/complexity.ts         heurística de complexidade via AST do TypeScript

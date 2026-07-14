@@ -1,25 +1,19 @@
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import type { PersonConfig, TrackedConfig } from "../config.js";
+import { loadTrackedConfig, saveTrackedConfig, type TrackedConfig } from "../config.js";
+import { removePerson, upsertPerson } from "../peopleService.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.resolve(__dirname, "..", "..", "config", "tracked.json");
-
-function loadConfig(): TrackedConfig {
-  return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8")) as TrackedConfig;
-}
-
-function saveConfig(config: TrackedConfig): void {
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n", "utf-8");
-}
 
 function printUsage(): void {
   console.log(`Uso:
   npm run people -- list
   npm run people -- add --id <personId> --name "<Nome>" [--email <email>...] [--git-name <nome-do-git>] [--github <login>...]
   npm run people -- remove --id <personId>
+
+Dica: "npm run ui" abre uma tela pra fazer isso mesmo pelo navegador.
 
 Exemplos:
   npm run people -- add --id joao-souza --name "João Souza" --email joao@empresa.com --github joaosouza
@@ -44,43 +38,22 @@ function cmdAdd(config: TrackedConfig, args: Record<string, unknown>): void {
   const id = args.id as string | undefined;
   if (!id) throw new Error("--id e obrigatorio.");
 
-  const emails = (args.email as string[] | undefined) ?? [];
-  const githubLogins = (args.github as string[] | undefined) ?? [];
-  const gitName = args["git-name"] as string | undefined;
-  const name = args.name as string | undefined;
+  const result = upsertPerson(config, {
+    personId: id,
+    name: args.name as string | undefined,
+    emails: args.email as string[] | undefined,
+    githubLogins: args.github as string[] | undefined,
+    gitName: args["git-name"] as string | undefined,
+  });
 
-  let person = config.people.find((p) => p.personId === id);
-  if (!person) {
-    if (!name) throw new Error(`Pessoa "${id}" nao existe ainda - use --name para cria-la.`);
-    person = { personId: id, name, gitIdentities: [], githubLogins: [] };
-    config.people.push(person);
-    console.log(`+ Pessoa criada: ${name} (${id})`);
-  } else if (name && name !== person.name) {
-    console.log(`~ Nome atualizado: "${person.name}" -> "${name}"`);
-    person.name = name;
+  console.log(result.created ? `+ Pessoa criada: ${result.person.name} (${id})` : `~ Pessoa atualizada: ${result.person.name} (${id})`);
+  for (const email of result.addedEmails) console.log(`  + identidade git: <${email}>`);
+  for (const login of result.addedLogins) console.log(`  + login github: ${login}`);
+  if (!result.addedEmails.length && !result.addedLogins.length && !result.created) {
+    console.log("  (nada novo pra adicionar - identidades ja cadastradas)");
   }
 
-  for (const email of emails) {
-    const identityName = gitName ?? person.name;
-    const exists = person.gitIdentities.some((i) => i.email.toLowerCase() === email.toLowerCase());
-    if (exists) {
-      console.log(`  (email ja cadastrado, ignorado: ${email})`);
-      continue;
-    }
-    person.gitIdentities.push({ name: identityName, email });
-    console.log(`  + identidade git: ${identityName} <${email}>`);
-  }
-
-  for (const login of githubLogins) {
-    if (person.githubLogins.some((l) => l.toLowerCase() === login.toLowerCase())) {
-      console.log(`  (login github ja cadastrado, ignorado: ${login})`);
-      continue;
-    }
-    person.githubLogins.push(login);
-    console.log(`  + login github: ${login}`);
-  }
-
-  saveConfig(config);
+  saveTrackedConfig(CONFIG_PATH, config);
   console.log(`\nconfig/tracked.json atualizado.`);
 }
 
@@ -88,14 +61,13 @@ function cmdRemove(config: TrackedConfig, args: Record<string, unknown>): void {
   const id = args.id as string | undefined;
   if (!id) throw new Error("--id e obrigatorio.");
 
-  const before = config.people.length;
-  config.people = config.people.filter((p) => p.personId !== id);
-  if (config.people.length === before) {
+  const removed = removePerson(config, id);
+  if (!removed) {
     console.log(`Nenhuma pessoa com id "${id}" encontrada - nada a remover.`);
     return;
   }
 
-  saveConfig(config);
+  saveTrackedConfig(CONFIG_PATH, config);
   console.log(`- Pessoa "${id}" removida de config/tracked.json.`);
   console.log(`  (commits/PRs dela nos repositorios passam a aparecer como "identidade nao mapeada" nas proximas execucoes, nao desaparecem do historico do Git.)`);
 }
@@ -119,7 +91,7 @@ function main() {
     strict: false,
   });
 
-  const config = loadConfig();
+  const config = loadTrackedConfig(CONFIG_PATH);
 
   switch (subcommand) {
     case "list":

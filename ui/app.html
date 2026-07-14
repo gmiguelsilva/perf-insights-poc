@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Perf Insights — Painel</title>
+<style>
+  :root {
+    --bg: #08090b;
+    --panel: #0d0f13;
+    --panel-2: #111318;
+    --border: rgba(126, 200, 227, 0.16);
+    --border-strong: rgba(56, 214, 255, 0.45);
+    --accent: #35d7ff;
+    --accent-dim: rgba(53, 215, 255, 0.12);
+    --violet: #9b7bff;
+    --text: #e9edf1;
+    --text-dim: #8993a4;
+    --text-mute: #545c68;
+    --danger: #ff5d6c;
+    --good: #37e0a1;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(53,215,255,0.05), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(155,123,255,0.05), transparent 40%);
+    background-attachment: fixed;
+  }
+  ::selection { background: var(--accent-dim); color: var(--accent); }
+
+  .shell { max-width: 980px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 14px; }
+  .brand { font-family: var(--mono); letter-spacing: 0.12em; font-size: 13px; color: var(--accent); text-transform: uppercase; }
+  .brand b { color: var(--text); }
+  .brand .dot { color: var(--violet); }
+
+  nav.tabs { display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 4px; }
+  nav.tabs button {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+    background: transparent; border: none; color: var(--text-dim); padding: 8px 14px; border-radius: 6px;
+    cursor: pointer; transition: color .15s, background .15s;
+  }
+  nav.tabs button:hover { color: var(--text); }
+  nav.tabs button.active { color: var(--bg); background: var(--accent); }
+  nav.tabs a.tab-link {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-dim); padding: 8px 14px; border-radius: 6px; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  nav.tabs a.tab-link:hover { color: var(--accent); }
+
+  .view { display: none; animation: fade .15s ease-out; }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 12px; flex-wrap: wrap; }
+  .panel-head h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin: 0; font-weight: 600; }
+  .panel-head .count { font-family: var(--mono); color: var(--accent); font-size: 12px; }
+  .hint { color: var(--text-mute); font-size: 12.5px; margin: 4px 0 14px; line-height: 1.5; }
+
+  button.btn {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.03em; cursor: pointer;
+    background: transparent; color: var(--accent); border: 1px solid var(--border-strong);
+    border-radius: 6px; padding: 7px 13px; transition: all .15s;
+  }
+  button.btn:hover { background: var(--accent-dim); box-shadow: 0 0 0 1px var(--border-strong), 0 0 18px -6px var(--accent); }
+  button.btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+  button.btn.primary { background: var(--accent-dim); }
+  button.btn.danger { color: var(--danger); border-color: rgba(255,93,108,0.4); }
+  button.btn.danger:hover { background: rgba(255,93,108,0.1); box-shadow: 0 0 18px -8px var(--danger); }
+  button.btn.ghost { border-color: var(--border); color: var(--text-dim); }
+  button.btn.ghost:hover { color: var(--text); background: rgba(255,255,255,0.03); box-shadow: none; }
+  button.btn.small { padding: 3px 9px; font-size: 11px; }
+
+  .person-card { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; background: var(--panel-2); }
+  .person-card .row1 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .person-card .name { font-size: 14.5px; font-weight: 600; }
+  .person-card .id { font-family: var(--mono); font-size: 11.5px; color: var(--text-mute); margin-left: 8px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip {
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim); background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border); border-radius: 5px; padding: 4px 6px 4px 9px;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .chip .x { cursor: pointer; color: var(--text-mute); }
+  .chip .x:hover { color: var(--danger); }
+  .chip.gh { color: var(--violet); }
+
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 11.5px; color: var(--text-dim); margin-bottom: 5px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 9px 11px; color: var(--text); font-family: var(--mono); font-size: 13px;
+  }
+  .field input:focus { outline: none; border-color: var(--border-strong); box-shadow: 0 0 0 3px var(--accent-dim); }
+  .field .sub { font-size: 11px; color: var(--text-mute); margin-top: 4px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+  .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+  .add-form { border-top: 1px dashed var(--border); margin-top: 14px; padding-top: 14px; display: none; }
+  .add-form.open { display: block; }
+
+  .discover-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; background: var(--panel-2); }
+  .discover-item .meta { font-family: var(--mono); font-size: 12.5px; }
+  .discover-item .meta .email { color: var(--accent); }
+  .discover-item .sub { color: var(--text-mute); font-size: 11.5px; margin-top: 3px; }
+  .discover-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  select {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px;
+    padding: 7px 9px; font-family: var(--mono); font-size: 12px;
+  }
+  .empty { color: var(--text-mute); font-size: 13px; padding: 20px 0; text-align: center; font-family: var(--mono); }
+  .badge-suggestion { font-size: 10.5px; color: var(--good); border: 1px solid rgba(55,224,161,0.35); border-radius: 4px; padding: 2px 6px; font-family: var(--mono); }
+
+  .repo-check, .person-check { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px; color: var(--text-dim); padding: 4px 0; }
+  .repo-check input, .person-check input { accent-color: var(--accent); }
+
+  .terminal {
+    background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+    font-family: var(--mono); font-size: 12px; line-height: 1.6; color: #9ef7c1;
+    height: 260px; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+  }
+  .terminal .exit-ok { color: var(--good); }
+  .terminal .exit-fail { color: var(--danger); }
+  .terminal-caret { display: inline-block; width: 7px; height: 13px; background: var(--good); animation: blink 1s steps(1) infinite; vertical-align: text-bottom; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .toast {
+    position: fixed; bottom: 20px; right: 20px; background: var(--panel); border: 1px solid var(--border-strong);
+    color: var(--text); font-family: var(--mono); font-size: 12.5px; padding: 10px 16px; border-radius: 8px;
+    box-shadow: 0 0 24px -6px var(--accent); opacity: 0; transform: translateY(8px); transition: all .2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: none; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .two-col, .form-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><b>PERF</b>_INSIGHTS <span class="dot">::</span> painel</div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-view="pessoas">Pessoas</button>
+      <button class="tab-btn" data-view="descobrir">Descobrir</button>
+      <button class="tab-btn" data-view="analise">Análise</button>
+      <a class="tab-link" href="/dashboard" target="_blank" rel="noopener">Dashboard ↗</a>
+    </nav>
+  </div>
+
+  <section class="view active" id="view-pessoas">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Pessoas rastreadas</h2>
+        <span class="count" id="people-count">—</span>
+      </div>
+      <p class="hint">Cada pessoa pode ter várias identidades de Git (nomes/emails diferentes por repositório) e logins do GitHub. Remover uma pessoa não apaga o histórico do Git — só faz os commits dela aparecerem como "não mapeados" na próxima análise.</p>
+      <div id="people-list"></div>
+      <button class="btn primary" id="btn-toggle-add">+ Adicionar pessoa</button>
+
+      <div class="add-form" id="add-form">
+        <div class="form-grid">
+          <div class="field">
+            <label>id</label>
+            <input type="text" id="f-id" placeholder="joao-souza" />
+            <div class="sub">slug único, sem espaço</div>
+          </div>
+          <div class="field">
+            <label>nome</label>
+            <input type="text" id="f-name" placeholder="João Souza" />
+          </div>
+          <div class="field">
+            <label>email(s) git</label>
+            <input type="text" id="f-emails" placeholder="joao@empresa.com, joao@pessoal.com" />
+            <div class="sub">separados por vírgula</div>
+          </div>
+          <div class="field">
+            <label>nome git (opcional)</label>
+            <input type="text" id="f-gitname" placeholder="joaosouza" />
+            <div class="sub">se o autor do commit usa um nome diferente</div>
+          </div>
+          <div class="field">
+            <label>login(s) github</label>
+            <input type="text" id="f-github" placeholder="joaosouza" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="btn-submit-add">Salvar</button>
+          <button class="btn ghost" id="btn-cancel-add">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-descobrir">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Identidades não mapeadas</h2>
+        <button class="btn" id="btn-run-discover">🔍 Buscar</button>
+      </div>
+      <p class="hint">Varre os repositórios configurados atrás de autores de commit e contribuidores de PR que ainda não batem com ninguém cadastrado.</p>
+      <div id="discover-git"></div>
+      <h2 style="margin-top:20px">Logins GitHub não mapeados</h2>
+      <div id="discover-github"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-analise">
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head"><h2>Filtro (opcional)</h2></div>
+        <p class="hint">Sem seleção = roda tudo, conforme config/tracked.json.</p>
+        <div style="margin-bottom:14px">
+          <div class="sub" style="font-family:var(--mono);color:var(--text-mute);margin-bottom:6px">REPOSITÓRIOS</div>
+          <div id="repo-checks"></div>
+        </div>
+        <div>
+          <div class="sub" style="font-family:var(--mono);color:var(--text-mute);margin-bottom:6px">PESSOAS</div>
+          <div id="person-checks"></div>
+        </div>
+        <button class="btn primary" id="btn-run-analyze" style="margin-top:14px">▶ Rodar análise</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Saída</h2></div>
+        <div class="terminal" id="terminal">$ aguardando<span class="terminal-caret"></span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var state = { people: [], repos: [] };
+
+  function showToast(msg) {
+    var toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("view-" + btn.dataset.view).classList.add("active");
+      if (btn.dataset.view === "analise") loadAnalyseFilters();
+    });
+  });
+
+  // ---------- Pessoas ----------
+  function renderPeople() {
+    var list = document.getElementById("people-list");
+    document.getElementById("people-count").textContent = state.people.length;
+    if (!state.people.length) {
+      list.innerHTML = '<div class="empty">nenhuma pessoa cadastrada ainda</div>';
+      return;
+    }
+    list.innerHTML = state.people.map(function (p) {
+      var emailChips = p.gitIdentities.map(function (idn) {
+        return '<span class="chip">' + escapeHtml(idn.name) + ' &lt;' + escapeHtml(idn.email) + '&gt;' +
+          '<span class="x" data-remove-identity="' + p.personId + '" data-email="' + escapeHtml(idn.email) + '">×</span></span>';
+      }).join("");
+      var ghChips = p.githubLogins.map(function (login) {
+        return '<span class="chip gh">@' + escapeHtml(login) +
+          '<span class="x" data-remove-github="' + p.personId + '" data-login="' + escapeHtml(login) + '">×</span></span>';
+      }).join("");
+      return '<div class="person-card">' +
+        '<div class="row1">' +
+          '<div><span class="name">' + escapeHtml(p.name) + '</span><span class="id">' + p.personId + '</span></div>' +
+          '<button class="btn danger small" data-remove-person="' + p.personId + '">Remover pessoa</button>' +
+        '</div>' +
+        '<div class="chip-row">' + emailChips + ghChips + '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  async function loadPeople() {
+    var res = await fetch("/api/people");
+    var data = await res.json();
+    state.people = data.people;
+    renderPeople();
+  }
+
+  document.getElementById("people-list").addEventListener("click", async function (evt) {
+    var t = evt.target;
+    if (t.dataset.removePerson) {
+      if (!confirm('Remover "' + t.dataset.removePerson + '"? O histórico de Git continua intacto.')) return;
+      await fetch("/api/people?id=" + encodeURIComponent(t.dataset.removePerson), { method: "DELETE" });
+      showToast("pessoa removida");
+      loadPeople();
+    } else if (t.dataset.removeIdentity) {
+      await fetch("/api/people/identity?id=" + encodeURIComponent(t.dataset.removeIdentity) + "&email=" + encodeURIComponent(t.dataset.email), { method: "DELETE" });
+      showToast("identidade removida");
+      loadPeople();
+    } else if (t.dataset.removeGithub) {
+      await fetch("/api/people/github?id=" + encodeURIComponent(t.dataset.removeGithub) + "&login=" + encodeURIComponent(t.dataset.login), { method: "DELETE" });
+      showToast("login github removido");
+      loadPeople();
+    }
+  });
+
+  document.getElementById("btn-toggle-add").addEventListener("click", function () {
+    document.getElementById("add-form").classList.toggle("open");
+  });
+  document.getElementById("btn-cancel-add").addEventListener("click", function () {
+    document.getElementById("add-form").classList.remove("open");
+  });
+
+  function splitList(v) {
+    return v.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  document.getElementById("btn-submit-add").addEventListener("click", async function () {
+    var id = document.getElementById("f-id").value.trim();
+    if (!id) { showToast("id é obrigatório"); return; }
+    var body = {
+      personId: id,
+      name: document.getElementById("f-name").value.trim() || undefined,
+      emails: splitList(document.getElementById("f-emails").value),
+      gitName: document.getElementById("f-gitname").value.trim() || undefined,
+      githubLogins: splitList(document.getElementById("f-github").value),
+    };
+    var res = await fetch("/api/people", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    var data = await res.json();
+    if (!res.ok || !data.ok) { showToast("erro: " + (data.error || "falha ao salvar")); return; }
+    ["f-id", "f-name", "f-emails", "f-gitname", "f-github"].forEach(function (fid) { document.getElementById(fid).value = ""; });
+    document.getElementById("add-form").classList.remove("open");
+    showToast(data.created ? "pessoa criada" : "pessoa atualizada");
+    loadPeople();
+  });
+
+  // ---------- Descobrir ----------
+  function personOptions(selectedId) {
+    var opts = state.people.map(function (p) {
+      return '<option value="' + p.personId + '"' + (p.personId === selectedId ? " selected" : "") + '>' + escapeHtml(p.name) + '</option>';
+    }).join("");
+    return '<option value="__new__"' + (selectedId ? "" : " selected") + '>+ nova pessoa</option>' + opts;
+  }
+
+  function renderDiscover(result) {
+    var gitBox = document.getElementById("discover-git");
+    var ghBox = document.getElementById("discover-github");
+
+    if (!result.unmatchedGit.length) {
+      gitBox.innerHTML = '<div class="empty">nenhuma identidade git pendente</div>';
+    } else {
+      gitBox.innerHTML = result.unmatchedGit.map(function (u, i) {
+        return '<div class="discover-item" data-idx="' + i + '">' +
+          '<div class="meta">' + escapeHtml(u.name) + ' &lt;<span class="email">' + escapeHtml(u.email) + '</span>&gt;' +
+            (u.suggestedPersonId ? ' <span class="badge-suggestion">parece ser ' + escapeHtml(u.suggestedPersonName) + '</span>' : '') + '</div>' +
+          '<div class="sub">' + u.commits + ' commit(s) em ' + escapeHtml(u.repoId) + '</div>' +
+          '<div class="discover-actions">' +
+            '<select class="git-target">' + personOptions(u.suggestedPersonId) + '</select>' +
+            '<input type="text" class="new-id" placeholder="id da nova pessoa" style="display:' + (u.suggestedPersonId ? "none" : "inline-block") + ';width:140px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 8px;font-family:var(--mono);font-size:12px" value="' + (u.suggestedPersonId ? "" : (u.name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 20)) + '" />' +
+            '<button class="btn small primary link-git" data-name="' + escapeHtml(u.name) + '" data-email="' + escapeHtml(u.email) + '">Vincular</button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+      gitBox.querySelectorAll(".git-target").forEach(function (sel) {
+        sel.addEventListener("change", function () {
+          var item = sel.closest(".discover-item");
+          item.querySelector(".new-id").style.display = sel.value === "__new__" ? "inline-block" : "none";
+        });
+      });
+
+      gitBox.querySelectorAll(".link-git").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          var item = btn.closest(".discover-item");
+          var sel = item.querySelector(".git-target");
+          var name = btn.dataset.name, email = btn.dataset.email;
+          var body;
+          if (sel.value === "__new__") {
+            var newId = item.querySelector(".new-id").value.trim();
+            if (!newId) { showToast("informe um id pra nova pessoa"); return; }
+            body = { personId: newId, name: name, emails: [email], gitName: name };
+          } else {
+            body = { personId: sel.value, emails: [email], gitName: name };
+          }
+          var res = await fetch("/api/people", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+          var data = await res.json();
+          if (!res.ok || !data.ok) { showToast("erro: " + (data.error || "falha")); return; }
+          showToast("vinculado a " + data.person.name);
+          loadPeople();
+          item.remove();
+        });
+      });
+    }
+
+    if (!result.unmatchedGithub.length) {
+      ghBox.innerHTML = '<div class="empty">nenhum login github pendente</div>';
+    } else {
+      ghBox.innerHTML = result.unmatchedGithub.map(function (u) {
+        return '<div class="discover-item">' +
+          '<div class="meta">@' + escapeHtml(u.login) + '</div>' +
+          '<div class="sub">' + u.contributions + ' contribuição(ões) em ' + escapeHtml(u.repoId) + '</div>' +
+          '<div class="discover-actions">' +
+            '<select class="gh-target">' + state.people.map(function (p) { return '<option value="' + p.personId + '">' + escapeHtml(p.name) + '</option>'; }).join("") + '</select>' +
+            '<button class="btn small primary link-gh" data-login="' + escapeHtml(u.login) + '">Vincular</button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+      ghBox.querySelectorAll(".link-gh").forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+          var item = btn.closest(".discover-item");
+          var sel = item.querySelector(".gh-target");
+          if (!sel.value) return;
+          var res = await fetch("/api/people", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ personId: sel.value, githubLogins: [btn.dataset.login] }) });
+          var data = await res.json();
+          if (!res.ok || !data.ok) { showToast("erro: " + (data.error || "falha")); return; }
+          showToast("vinculado a " + data.person.name);
+          item.remove();
+        });
+      });
+    }
+  }
+
+  document.getElementById("btn-run-discover").addEventListener("click", async function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = "buscando…";
+    try {
+      var res = await fetch("/api/discover");
+      var data = await res.json();
+      renderDiscover(data);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "🔍 Buscar";
+    }
+  });
+
+  // ---------- Análise ----------
+  async function loadAnalyseFilters() {
+    var repoRes = await fetch("/api/repos");
+    var repoData = await repoRes.json();
+    state.repos = repoData.repos;
+    document.getElementById("repo-checks").innerHTML = state.repos.map(function (r) {
+      return '<label class="repo-check"><input type="checkbox" value="' + r.id + '" />' + r.id +
+        (r.exists ? "" : ' <span style="color:var(--danger)">(não encontrado)</span>') + '</label>';
+    }).join("") || '<div class="empty">nenhum repositório configurado</div>';
+
+    document.getElementById("person-checks").innerHTML = state.people.map(function (p) {
+      return '<label class="person-check"><input type="checkbox" value="' + p.personId + '" />' + escapeHtml(p.name) + '</label>';
+    }).join("") || '<div class="empty">nenhuma pessoa cadastrada</div>';
+  }
+
+  document.getElementById("btn-run-analyze").addEventListener("click", async function () {
+    var btn = this;
+    var term = document.getElementById("terminal");
+    var repos = [].slice.call(document.querySelectorAll("#repo-checks input:checked")).map(function (i) { return i.value; });
+    var people = [].slice.call(document.querySelectorAll("#person-checks input:checked")).map(function (i) { return i.value; });
+
+    var params = new URLSearchParams();
+    if (repos.length) params.set("repos", repos.join(","));
+    if (people.length) params.set("people", people.join(","));
+
+    btn.disabled = true;
+    btn.textContent = "rodando…";
+    term.textContent = "$ npm run analyze" + (params.toString() ? " -- --" + params.toString().replace("=", " ") : "") + "\n";
+
+    try {
+      var res = await fetch("/api/analyze?" + params.toString(), { method: "POST" });
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+        var text = decoder.decode(chunk.value, { stream: true });
+        if (text.indexOf("__DONE__") !== -1) {
+          var ok = text.indexOf("exit=0") !== -1;
+          text = text.replace(/__DONE__.*$/, "") + (ok ? "\n[ok] análise concluída" : "\n[falhou] veja o log acima");
+          term.innerHTML += escapeHtml(text).replace("[ok] análise concluída", '<span class="exit-ok">[ok] análise concluída</span>').replace("[falhou] veja o log acima", '<span class="exit-fail">[falhou] veja o log acima</span>');
+        } else {
+          term.innerHTML += escapeHtml(text);
+        }
+        term.scrollTop = term.scrollHeight;
+      }
+      showToast("análise finalizada");
+      loadPeople();
+    } catch (err) {
+      term.innerHTML += '\n<span class="exit-fail">erro: ' + escapeHtml(err.message) + '</span>';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "▶ Rodar análise";
+    }
+  });
+
+  loadPeople();
+})();
+</script>
+</body>
+</html>

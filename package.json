@@ -7,7 +7,8 @@
   "scripts": {
     "analyze": "tsx src/index.ts",
     "people": "tsx src/cli/people.ts",
-    "discover": "tsx src/cli/discover.ts"
+    "discover": "tsx src/cli/discover.ts",
+    "ui": "tsx src/server.ts"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
