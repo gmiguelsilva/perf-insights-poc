@@ -1,0 +1,490 @@
+{
+  "generatedAt": "2026-07-14T00:43:14.500Z",
+  "sourceRepo": "C:\\Users\\Miguel\\gd-crm-poc",
+  "people": [
+    {
+      "personId": "dev-main",
+      "name": "miguelsilvag (Dev)",
+      "role": "dev",
+      "origin": "real",
+      "iterations": [
+        {
+          "iteration": 0,
+          "iterationLabel": "Iteração 1",
+          "score": 100,
+          "note": "Initial commit from Create Next App"
+        },
+        {
+          "iteration": 1,
+          "iterationLabel": "Iteração 2",
+          "score": 96,
+          "note": "Estrutura inicial da PoC de GD: dashboard, pipeline, clientes, usinas, UCs e contratos"
+        },
+        {
+          "iteration": 2,
+          "iterationLabel": "Iteração 3",
+          "score": 94,
+          "note": "Adiciona formularios (Server Actions), paginas de detalhe e grafico de geracao"
+        },
+        {
+          "iteration": 3,
+          "iterationLabel": "Iteração 4",
+          "score": 93,
+          "note": "Adiciona autenticacao (login/logout) e tela de perfil do usuario"
+        },
+        {
+          "iteration": 4,
+          "iterationLabel": "Iteração 5",
+          "score": 93,
+          "note": "Versiona .env.example para documentar variaveis de ambiente necessarias"
+        },
+        {
+          "iteration": 5,
+          "iterationLabel": "Iteração 6",
+          "score": 93,
+          "note": "Adiciona motor de Rateio de Energia e Dashboard Executivo (baseado no Veo-Sales)"
+        },
+        {
+          "iteration": 6,
+          "iterationLabel": "Iteração 7",
+          "score": 93,
+          "note": "Adiciona Portal do Cliente (self-service), inspirado no ClientPortal do Veo-Sales"
+        }
+      ],
+      "raw": [
+        {
+          "linesAdded": 7008,
+          "linesRemoved": 0,
+          "filesChanged": 19,
+          "eslintErrors": 0,
+          "eslintWarnings": 0,
+          "issuesPerKloc": 0,
+          "avgComplexity": 1,
+          "maxComplexity": 1
+        },
+        {
+          "linesAdded": 11793,
+          "linesRemoved": 3661,
+          "filesChanged": 36,
+          "eslintErrors": 1,
+          "eslintWarnings": 4,
+          "issuesPerKloc": 1.5,
+          "avgComplexity": 1.44,
+          "maxComplexity": 9
+        },
+        {
+          "linesAdded": 3110,
+          "linesRemoved": 43,
+          "filesChanged": 33,
+          "eslintErrors": 1,
+          "eslintWarnings": 4,
+          "issuesPerKloc": 0.83,
+          "avgComplexity": 2.17,
+          "maxComplexity": 32
+        },
+        {
+          "linesAdded": 571,
+          "linesRemoved": 24,
+          "filesChanged": 26,
+          "eslintErrors": 1,
+          "eslintWarnings": 4,
+          "issuesPerKloc": 0.76,
+          "avgComplexity": 2.22,
+          "maxComplexity": 32
+        },
+        {
+          "linesAdded": 6,
+          "linesRemoved": 0,
+          "filesChanged": 2,
+          "eslintErrors": 1,
+          "eslintWarnings": 4,
+          "issuesPerKloc": 0.76,
+          "avgComplexity": 2.22,
+          "maxComplexity": 32
+        },
+        {
+          "linesAdded": 3802,
+          "linesRemoved": 414,
+          "filesChanged": 34,
+          "eslintErrors": 1,
+          "eslintWarnings": 3,
+          "issuesPerKloc": 0.4,
+          "avgComplexity": 2.41,
+          "maxComplexity": 45
+        },
+        {
+          "linesAdded": 1058,
+          "linesRemoved": 2,
+          "filesChanged": 24,
+          "eslintErrors": 1,
+          "eslintWarnings": 3,
+          "issuesPerKloc": 0.37,
+          "avgComplexity": 2.43,
+          "maxComplexity": 45
+        }
+      ]
+    },
+    {
+      "personId": "qa-camila",
+      "name": "Camila Nunes (QA)",
+      "role": "qa",
+      "origin": "simulado",
+      "iterations": [
+        {
+          "iteration": 0,
+          "iterationLabel": "Iteração 1",
+          "score": 57
+        },
+        {
+          "iteration": 1,
+          "iterationLabel": "Iteração 2",
+          "score": 50
+        },
+        {
+          "iteration": 2,
+          "iterationLabel": "Iteração 3",
+          "score": 53
+        },
+        {
+          "iteration": 3,
+          "iterationLabel": "Iteração 4",
+          "score": 59
+        },
+        {
+          "iteration": 4,
+          "iterationLabel": "Iteração 5",
+          "score": 64
+        },
+        {
+          "iteration": 5,
+          "iterationLabel": "Iteração 6",
+          "score": 84
+        },
+        {
+          "iteration": 6,
+          "iterationLabel": "Iteração 7",
+          "score": 71
+        }
+      ],
+      "raw": [
+        {
+          "bugsFound": 13,
+          "escapedDefects": 5,
+          "testCasesWritten": 6,
+          "reviewComments": 9,
+          "avgReviewTurnaroundHours": 11.2
+        },
+        {
+          "bugsFound": 6,
+          "escapedDefects": 5,
+          "testCasesWritten": 11,
+          "reviewComments": 7,
+          "avgReviewTurnaroundHours": 8.4
+        },
+        {
+          "bugsFound": 12,
+          "escapedDefects": 4,
+          "testCasesWritten": 13,
+          "reviewComments": 5,
+          "avgReviewTurnaroundHours": 16.2
+        },
+        {
+          "bugsFound": 10,
+          "escapedDefects": 4,
+          "testCasesWritten": 13,
+          "reviewComments": 7,
+          "avgReviewTurnaroundHours": 9.2
+        },
+        {
+          "bugsFound": 9,
+          "escapedDefects": 3,
+          "testCasesWritten": 7,
+          "reviewComments": 7,
+          "avgReviewTurnaroundHours": 7.2
+        },
+        {
+          "bugsFound": 18,
+          "escapedDefects": 2,
+          "testCasesWritten": 14,
+          "reviewComments": 12,
+          "avgReviewTurnaroundHours": 5.7
+        },
+        {
+          "bugsFound": 9,
+          "escapedDefects": 1,
+          "testCasesWritten": 13,
+          "reviewComments": 12,
+          "avgReviewTurnaroundHours": 8.4
+        }
+      ]
+    },
+    {
+      "personId": "qa-bruno",
+      "name": "Bruno Alves (QA)",
+      "role": "qa",
+      "origin": "simulado",
+      "iterations": [
+        {
+          "iteration": 0,
+          "iterationLabel": "Iteração 1",
+          "score": 52
+        },
+        {
+          "iteration": 1,
+          "iterationLabel": "Iteração 2",
+          "score": 35
+        },
+        {
+          "iteration": 2,
+          "iterationLabel": "Iteração 3",
+          "score": 59
+        },
+        {
+          "iteration": 3,
+          "iterationLabel": "Iteração 4",
+          "score": 51
+        },
+        {
+          "iteration": 4,
+          "iterationLabel": "Iteração 5",
+          "score": 44
+        },
+        {
+          "iteration": 5,
+          "iterationLabel": "Iteração 6",
+          "score": 37
+        },
+        {
+          "iteration": 6,
+          "iterationLabel": "Iteração 7",
+          "score": 48
+        }
+      ],
+      "raw": [
+        {
+          "bugsFound": 10,
+          "escapedDefects": 6,
+          "testCasesWritten": 7,
+          "reviewComments": 4,
+          "avgReviewTurnaroundHours": 8.4
+        },
+        {
+          "bugsFound": 9,
+          "escapedDefects": 8,
+          "testCasesWritten": 12,
+          "reviewComments": 10,
+          "avgReviewTurnaroundHours": 13.8
+        },
+        {
+          "bugsFound": 9,
+          "escapedDefects": 4,
+          "testCasesWritten": 12,
+          "reviewComments": 4,
+          "avgReviewTurnaroundHours": 8.6
+        },
+        {
+          "bugsFound": 8,
+          "escapedDefects": 5,
+          "testCasesWritten": 12,
+          "reviewComments": 6,
+          "avgReviewTurnaroundHours": 10
+        },
+        {
+          "bugsFound": 10,
+          "escapedDefects": 5,
+          "testCasesWritten": 7,
+          "reviewComments": 7,
+          "avgReviewTurnaroundHours": 17.2
+        },
+        {
+          "bugsFound": 10,
+          "escapedDefects": 7,
+          "testCasesWritten": 10,
+          "reviewComments": 5,
+          "avgReviewTurnaroundHours": 16.4
+        },
+        {
+          "bugsFound": 13,
+          "escapedDefects": 8,
+          "testCasesWritten": 12,
+          "reviewComments": 8,
+          "avgReviewTurnaroundHours": 8.8
+        }
+      ]
+    },
+    {
+      "personId": "func-renata",
+      "name": "Renata Ferraz (Funcional)",
+      "role": "funcional",
+      "origin": "simulado",
+      "iterations": [
+        {
+          "iteration": 0,
+          "iterationLabel": "Iteração 1",
+          "score": 56
+        },
+        {
+          "iteration": 1,
+          "iterationLabel": "Iteração 2",
+          "score": 61
+        },
+        {
+          "iteration": 2,
+          "iterationLabel": "Iteração 3",
+          "score": 50
+        },
+        {
+          "iteration": 3,
+          "iterationLabel": "Iteração 4",
+          "score": 50
+        },
+        {
+          "iteration": 4,
+          "iterationLabel": "Iteração 5",
+          "score": 63
+        },
+        {
+          "iteration": 5,
+          "iterationLabel": "Iteração 6",
+          "score": 69
+        },
+        {
+          "iteration": 6,
+          "iterationLabel": "Iteração 7",
+          "score": 75
+        }
+      ],
+      "raw": [
+        {
+          "requirementsWritten": 8,
+          "clarificationRequests": 2,
+          "reworkCausedPct": 15.2,
+          "stakeholderApprovalDays": 2.9
+        },
+        {
+          "requirementsWritten": 7,
+          "clarificationRequests": 4,
+          "reworkCausedPct": 8,
+          "stakeholderApprovalDays": 2.5
+        },
+        {
+          "requirementsWritten": 5,
+          "clarificationRequests": 3,
+          "reworkCausedPct": 18.2,
+          "stakeholderApprovalDays": 2.7
+        },
+        {
+          "requirementsWritten": 7,
+          "clarificationRequests": 4,
+          "reworkCausedPct": 13.3,
+          "stakeholderApprovalDays": 3.1
+        },
+        {
+          "requirementsWritten": 6,
+          "clarificationRequests": 1,
+          "reworkCausedPct": 13.3,
+          "stakeholderApprovalDays": 2.9
+        },
+        {
+          "requirementsWritten": 4,
+          "clarificationRequests": 2,
+          "reworkCausedPct": 7.4,
+          "stakeholderApprovalDays": 2.5
+        },
+        {
+          "requirementsWritten": 7,
+          "clarificationRequests": 2,
+          "reworkCausedPct": 6.5,
+          "stakeholderApprovalDays": 1.9
+        }
+      ]
+    },
+    {
+      "personId": "func-diego",
+      "name": "Diego Prado (Funcional)",
+      "role": "funcional",
+      "origin": "simulado",
+      "iterations": [
+        {
+          "iteration": 0,
+          "iterationLabel": "Iteração 1",
+          "score": 52
+        },
+        {
+          "iteration": 1,
+          "iterationLabel": "Iteração 2",
+          "score": 57
+        },
+        {
+          "iteration": 2,
+          "iterationLabel": "Iteração 3",
+          "score": 29
+        },
+        {
+          "iteration": 3,
+          "iterationLabel": "Iteração 4",
+          "score": 51
+        },
+        {
+          "iteration": 4,
+          "iterationLabel": "Iteração 5",
+          "score": 57
+        },
+        {
+          "iteration": 5,
+          "iterationLabel": "Iteração 6",
+          "score": 26
+        },
+        {
+          "iteration": 6,
+          "iterationLabel": "Iteração 7",
+          "score": 39
+        }
+      ],
+      "raw": [
+        {
+          "requirementsWritten": 6,
+          "clarificationRequests": 3,
+          "reworkCausedPct": 23.7,
+          "stakeholderApprovalDays": 1.3
+        },
+        {
+          "requirementsWritten": 4,
+          "clarificationRequests": 5,
+          "reworkCausedPct": 8.8,
+          "stakeholderApprovalDays": 2.4
+        },
+        {
+          "requirementsWritten": 4,
+          "clarificationRequests": 7,
+          "reworkCausedPct": 27.2,
+          "stakeholderApprovalDays": 1.8
+        },
+        {
+          "requirementsWritten": 5,
+          "clarificationRequests": 6,
+          "reworkCausedPct": 13.6,
+          "stakeholderApprovalDays": 1.8
+        },
+        {
+          "requirementsWritten": 3,
+          "clarificationRequests": 5,
+          "reworkCausedPct": 14.8,
+          "stakeholderApprovalDays": 1.2
+        },
+        {
+          "requirementsWritten": 3,
+          "clarificationRequests": 7,
+          "reworkCausedPct": 28.9,
+          "stakeholderApprovalDays": 1.9
+        },
+        {
+          "requirementsWritten": 5,
+          "clarificationRequests": 4,
+          "reworkCausedPct": 30.3,
+          "stakeholderApprovalDays": 1.4
+        }
+      ]
+    }
+  ]
+}
