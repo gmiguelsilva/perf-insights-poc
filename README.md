@@ -128,8 +128,16 @@ frontend) com três abas:
   "Vincular" — um clique em vez de copiar/colar.
 - **Análise** — checkboxes de pessoas/repositórios + botão "Rodar análise",
   com a saída do processo (o mesmo `npm run analyze`) transmitida ao vivo
-  num painel estilo terminal. Ao terminar, tem um link direto pro
-  `/dashboard` (o mesmo `dist/dashboard.html` de sempre).
+  num painel estilo terminal.
+- **Dashboard** — a mesma linha do tempo de evolução (gráfico, stat tiles,
+  tabela de eventos), só que como uma aba do próprio painel, com o mesmo
+  visual "minimal futurista" das outras abas - não abre em outra janela nem
+  muda de estilo. Lê direto de `/api/report` (o mesmo `data/aggregated.json`
+  da última análise).
+
+O `dist/dashboard.html` gerado por `npm run analyze` continua existindo à
+parte (útil pra mandar pra alguém como arquivo único, sem precisar do
+servidor rodando) - só não é mais o caminho usado dentro do painel.
 
 Tudo isso conversa com o mesmo `config/tracked.json` e os mesmos scripts
 (`src/peopleService.ts`, `src/discoverService.ts`, `src/index.ts`) usados

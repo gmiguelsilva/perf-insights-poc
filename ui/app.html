@@ -48,12 +48,6 @@
   }
   nav.tabs button:hover { color: var(--text); }
   nav.tabs button.active { color: var(--bg); background: var(--accent); }
-  nav.tabs a.tab-link {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
-    color: var(--text-dim); padding: 8px 14px; border-radius: 6px; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  nav.tabs a.tab-link:hover { color: var(--accent); }
 
   .view { display: none; animation: fade .15s ease-out; }
   .view.active { display: block; }
@@ -142,6 +136,44 @@
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 720px) { .two-col, .form-grid { grid-template-columns: 1fr; } }
+
+  /* ---- Dashboard tab ---- */
+  .dash-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .dash-stat-tile { background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; }
+  .dash-stat-tile .role { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-mute); }
+  .dash-stat-tile .name { font-size: 13px; color: var(--text-dim); margin: 2px 0 6px; }
+  .dash-stat-tile .value { font-family: var(--mono); font-size: 26px; font-weight: 600; color: var(--text); }
+  .dash-stat-tile .delta { font-family: var(--mono); font-size: 11.5px; margin-top: 4px; }
+  .dash-stat-tile .delta.up { color: var(--good); }
+  .dash-stat-tile .delta.down { color: var(--danger); }
+  .dash-stat-tile .repos { font-family: var(--mono); font-size: 10.5px; color: var(--text-mute); margin-top: 6px; }
+
+  .dash-chart-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 11.5px; color: var(--text-dim); }
+  .dash-chart-legend .item { display: inline-flex; align-items: center; gap: 6px; }
+  .dash-chart-legend .swatch { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .dash-chart-legend .marker-key { margin-left: auto; color: var(--text-mute); display: flex; gap: 14px; }
+
+  .dash-tooltip {
+    position: absolute; pointer-events: none; background: #000; border: 1px solid var(--border-strong);
+    border-radius: 8px; padding: 8px 10px; font-family: var(--mono); font-size: 11.5px; color: var(--text);
+    box-shadow: 0 0 20px -4px var(--accent); display: none; z-index: 5; min-width: 190px; max-width: 260px;
+  }
+  .dash-tooltip .t-title { color: var(--text-mute); font-size: 10.5px; margin-bottom: 4px; }
+  .dash-tooltip .t-row { display: flex; justify-content: space-between; gap: 12px; }
+  .dash-tooltip .t-row + .t-row { margin-top: 3px; }
+  .dash-tooltip .t-label { display: flex; align-items: center; gap: 6px; color: var(--text-dim); }
+  .dash-tooltip .t-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .dash-tooltip .t-val { font-weight: 600; }
+  .dash-tooltip .t-msg { color: var(--text-mute); font-size: 10.5px; margin-top: 4px; word-break: break-word; }
+
+  table.dash-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11.5px; margin-top: 10px; }
+  table.dash-table th, table.dash-table td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--border); }
+  table.dash-table th { color: var(--text-mute); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+  table.dash-table td.num, table.dash-table th.num { text-align: right; }
+  .dash-details summary { cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--text-dim); padding: 6px 0; }
+  .dash-axis-label { fill: var(--text-mute); font-size: 10px; font-family: var(--mono); }
+  .dash-gridline { stroke: var(--border); stroke-width: 1; }
+  .dash-baseline { stroke: rgba(126,200,227,0.3); stroke-width: 1; }
 </style>
 </head>
 <body>
@@ -152,7 +184,7 @@
       <button class="tab-btn active" data-view="pessoas">Pessoas</button>
       <button class="tab-btn" data-view="descobrir">Descobrir</button>
       <button class="tab-btn" data-view="analise">Análise</button>
-      <a class="tab-link" href="/dashboard" target="_blank" rel="noopener">Dashboard ↗</a>
+      <button class="tab-btn" data-view="dashboard">Dashboard</button>
     </nav>
   </div>
 
@@ -234,6 +266,24 @@
       </div>
     </div>
   </section>
+
+  <section class="view" id="view-dashboard">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Evolução (score por evento)</h2>
+        <span class="count" id="dash-subtitle">—</span>
+      </div>
+      <p class="hint">Cada ponto é um evento real (commit ou PR), ordenado por data/hora — inclusive entre repositórios diferentes. Marcador circular = commit, quadrado = PR.</p>
+      <div class="dash-stat-grid" id="dash-stats"></div>
+      <div id="dash-chart-wrap"></div>
+      <div class="dash-details">
+        <details>
+          <summary id="dash-table-summary">Ver tabela de eventos</summary>
+          <div id="dash-table"></div>
+        </details>
+      </div>
+    </div>
+  </section>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -264,6 +314,7 @@
       btn.classList.add("active");
       document.getElementById("view-" + btn.dataset.view).classList.add("active");
       if (btn.dataset.view === "analise") loadAnalyseFilters();
+      if (btn.dataset.view === "dashboard") loadDashboard();
     });
   });
 
@@ -505,6 +556,226 @@
       btn.textContent = "▶ Rodar análise";
     }
   });
+
+  // ---------- Dashboard ----------
+  var DASH_COLORS = ["#35d7ff", "#9b7bff", "#37e0a1", "#ffb454", "#ff6fb0", "#6ee7f2"];
+  var dashColorByPerson = {};
+
+  function dashColorFor(personId) {
+    return dashColorByPerson[personId] || "#35d7ff";
+  }
+  function dashFmtDate(iso) { try { return new Date(iso).toLocaleString("pt-BR"); } catch (e) { return iso; } }
+  function dashFmtDateShort(iso) { try { return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }); } catch (e) { return iso; } }
+
+  function renderDashStats(people) {
+    var grid = document.getElementById("dash-stats");
+    if (!people.length) {
+      grid.innerHTML = '<div class="empty">nenhum evento ainda - rode uma análise na aba Análise</div>';
+      return;
+    }
+    grid.innerHTML = people.map(function (person) {
+      var first = person.events[0], last = person.events[person.events.length - 1];
+      var delta = last.score - first.score;
+      var color = dashColorFor(person.personId);
+      return '<div class="dash-stat-tile" style="border-left-color:' + color + '">' +
+        '<div class="role">dev</div>' +
+        '<div class="name">' + escapeHtml(person.name) + '</div>' +
+        '<div class="value">' + last.score + '</div>' +
+        '<div class="delta ' + (delta >= 0 ? "up" : "down") + '">' + (delta >= 0 ? "▲ +" : "▼ ") + delta + ' desde o 1º evento</div>' +
+        '<div class="repos">' + person.reposTouched.join(", ") + '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  function buildDashChart(container, people) {
+    var width = container.clientWidth || 640;
+    var height = 280;
+    var padL = 34, padR = 16, padT = 16, padB = 28;
+    var innerW = width - padL - padR;
+    var innerH = height - padT - padB;
+
+    var allEvents = people.flatMap(function (p) { return p.events; });
+    var times = allEvents.map(function (e) { return new Date(e.timestamp).getTime(); });
+    var minT = Math.min.apply(null, times), maxT = Math.max.apply(null, times);
+    var span = maxT - minT || 1;
+
+    var xAt = function (t) { return padL + (innerW * (t - minT)) / span; };
+    var yAt = function (v) { return padT + innerH - (innerH * v) / 100; };
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("width", "100%"); svg.setAttribute("height", height);
+    svg.style.display = "block"; svg.style.overflow = "visible";
+
+    [0, 25, 50, 75, 100].forEach(function (tick) {
+      var y = yAt(tick);
+      var line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", padL); line.setAttribute("x2", width - padR);
+      line.setAttribute("y1", y); line.setAttribute("y2", y);
+      line.setAttribute("class", "dash-gridline");
+      svg.appendChild(line);
+      var label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", padL - 8); label.setAttribute("y", y + 3);
+      label.setAttribute("text-anchor", "end"); label.setAttribute("class", "dash-axis-label");
+      label.textContent = tick;
+      svg.appendChild(label);
+    });
+
+    var baseline = document.createElementNS(svgNS, "line");
+    baseline.setAttribute("x1", padL); baseline.setAttribute("x2", width - padR);
+    baseline.setAttribute("y1", padT + innerH); baseline.setAttribute("y2", padT + innerH);
+    baseline.setAttribute("class", "dash-baseline");
+    svg.appendChild(baseline);
+
+    [minT, maxT].forEach(function (t, i) {
+      var label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", xAt(t)); label.setAttribute("y", height - 8);
+      label.setAttribute("text-anchor", i === 0 ? "start" : "end");
+      label.setAttribute("class", "dash-axis-label");
+      label.textContent = dashFmtDateShort(new Date(t).toISOString());
+      svg.appendChild(label);
+    });
+
+    var hoverLine = document.createElementNS(svgNS, "line");
+    hoverLine.setAttribute("y1", padT); hoverLine.setAttribute("y2", padT + innerH);
+    hoverLine.setAttribute("stroke", "rgba(126,200,227,0.35)");
+    hoverLine.setAttribute("stroke-width", "1");
+    hoverLine.style.display = "none";
+    svg.appendChild(hoverLine);
+
+    people.forEach(function (person) {
+      var color = dashColorFor(person.personId);
+      var d = person.events.map(function (e, i) {
+        return (i === 0 ? "M" : "L") + xAt(new Date(e.timestamp).getTime()).toFixed(1) + " " + yAt(e.score).toFixed(1);
+      }).join(" ");
+      var path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", d); path.setAttribute("fill", "none");
+      path.setAttribute("stroke", color); path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-linejoin", "round"); path.setAttribute("stroke-linecap", "round");
+      path.style.filter = "drop-shadow(0 0 4px " + color + "80)";
+      svg.appendChild(path);
+
+      person.events.forEach(function (e, i) {
+        var cx = xAt(new Date(e.timestamp).getTime()), cy = yAt(e.score);
+        var ring = document.createElementNS(svgNS, "circle");
+        ring.setAttribute("cx", cx); ring.setAttribute("cy", cy);
+        ring.setAttribute("r", i === person.events.length - 1 ? 6 : 4);
+        ring.setAttribute("fill", "#08090b");
+        svg.appendChild(ring);
+
+        if (e.type === "pr") {
+          var s = i === person.events.length - 1 ? 7 : 4.5;
+          var rect = document.createElementNS(svgNS, "rect");
+          rect.setAttribute("x", cx - s / 2); rect.setAttribute("y", cy - s / 2);
+          rect.setAttribute("width", s); rect.setAttribute("height", s);
+          rect.setAttribute("fill", color);
+          svg.appendChild(rect);
+        } else {
+          var dot = document.createElementNS(svgNS, "circle");
+          dot.setAttribute("cx", cx); dot.setAttribute("cy", cy);
+          dot.setAttribute("r", i === person.events.length - 1 ? 4 : 2.5);
+          dot.setAttribute("fill", color);
+          svg.appendChild(dot);
+        }
+      });
+    });
+
+    container.innerHTML = "";
+    container.style.position = "relative";
+    container.appendChild(svg);
+
+    var tooltip = document.createElement("div");
+    tooltip.className = "dash-tooltip";
+    container.appendChild(tooltip);
+
+    svg.addEventListener("mousemove", function (evt) {
+      var rect = svg.getBoundingClientRect();
+      var mx = (evt.clientX - rect.left) * (width / rect.width);
+      var targetT = minT + ((mx - padL) / innerW) * span;
+
+      var nearest = null, nearestDist = Infinity;
+      people.forEach(function (person) {
+        person.events.forEach(function (e) {
+          var t = new Date(e.timestamp).getTime();
+          var dist = Math.abs(t - targetT);
+          if (dist < nearestDist) { nearestDist = dist; nearest = { person: person, event: e, t: t }; }
+        });
+      });
+      if (!nearest) return;
+
+      hoverLine.style.display = "";
+      hoverLine.setAttribute("x1", xAt(nearest.t)); hoverLine.setAttribute("x2", xAt(nearest.t));
+
+      var e = nearest.event;
+      var typeLabel = e.type === "pr" ? ("PR #" + e.number) : ("commit " + e.shortSha);
+      var msg = e.type === "pr" ? e.title : e.message;
+      tooltip.innerHTML =
+        '<div class="t-title">' + dashFmtDate(e.timestamp) + ' · ' + e.repoId + ' · ' + typeLabel + '</div>' +
+        '<div class="t-row"><span class="t-label"><span class="t-dot" style="background:' + dashColorFor(nearest.person.personId) + '"></span>' + escapeHtml(nearest.person.name) + '</span><span class="t-val">score ' + e.score + '</span></div>' +
+        '<div class="t-row"><span class="t-label">signal</span><span class="t-val">' + e.signal + '</span></div>' +
+        '<div class="t-msg">' + escapeHtml((msg || "").slice(0, 90)) + '</div>';
+      tooltip.style.display = "block";
+      var left = (rect.width * (nearest.t - minT)) / span;
+      tooltip.style.left = Math.min(Math.max(left, 0), rect.width - 220) + "px";
+      tooltip.style.top = "0px";
+    });
+    svg.addEventListener("mouseleave", function () { hoverLine.style.display = "none"; tooltip.style.display = "none"; });
+  }
+
+  function renderDashLegendAndChart(people) {
+    var wrap = document.getElementById("dash-chart-wrap");
+    wrap.innerHTML = "";
+    if (!people.length) {
+      wrap.innerHTML = '<div class="empty">nada pra mostrar ainda</div>';
+      return;
+    }
+    var chartDiv = document.createElement("div");
+    wrap.appendChild(chartDiv);
+
+    var legend = document.createElement("div");
+    legend.className = "dash-chart-legend";
+    legend.innerHTML = people.map(function (p) {
+      return '<span class="item"><span class="swatch" style="background:' + dashColorFor(p.personId) + '"></span>' + escapeHtml(p.name) + '</span>';
+    }).join("") + '<span class="marker-key">● commit &nbsp; ■ PR</span>';
+    wrap.appendChild(legend);
+
+    buildDashChart(chartDiv, people);
+  }
+
+  function renderDashTable(people) {
+    var rows = [];
+    people.forEach(function (person) {
+      person.events.forEach(function (e) { rows.push({ person: person, e: e }); });
+    });
+    rows.sort(function (a, b) { return new Date(a.e.timestamp) - new Date(b.e.timestamp); });
+    document.getElementById("dash-table-summary").textContent = "Ver tabela de eventos (" + rows.length + ")";
+
+    var thead = "<thead><tr><th>Pessoa</th><th>Data</th><th>Repo</th><th>Tipo</th><th>Descrição</th><th class=\"num\">Signal</th><th class=\"num\">Score</th></tr></thead>";
+    var body = rows.map(function (r) {
+      var e = r.e;
+      var typeLabel = e.type === "pr" ? "PR #" + e.number : "commit " + e.shortSha;
+      var desc = ((e.type === "pr" ? e.title : e.message) || "").slice(0, 70);
+      return "<tr><td>" + escapeHtml(r.person.name) + "</td><td>" + dashFmtDate(e.timestamp) + "</td><td>" + e.repoId + "</td><td>" + typeLabel + "</td><td>" + escapeHtml(desc) + "</td>" +
+        '<td class="num">' + e.signal + '</td><td class="num">' + e.score + "</td></tr>";
+    }).join("");
+    document.getElementById("dash-table").innerHTML = '<table class="dash-table">' + thead + "<tbody>" + body + "</tbody></table>";
+  }
+
+  async function loadDashboard() {
+    var res = await fetch("/api/report");
+    var report = await res.json();
+    report.people.forEach(function (p, i) { dashColorByPerson[p.personId] = DASH_COLORS[i % DASH_COLORS.length]; });
+    var people = report.people.filter(function (p) { return p.events.length > 0; });
+
+    var totalEvents = report.people.reduce(function (s, p) { return s + p.events.length; }, 0);
+    document.getElementById("dash-subtitle").textContent =
+      report.people.length + " pessoa(s) · " + (report.repos || []).length + " repo(s) · " + totalEvents + " eventos";
+
+    renderDashStats(people);
+    renderDashLegendAndChart(people);
+    renderDashTable(people);
+  }
 
   loadPeople();
 })();
