@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "POC de analise de performance/evolucao de devs, QAs e funcionais a partir de sinais reais de Git + camada sintetica de QA/Funcional",
+  "description": "POC de analise de performance/evolucao de devs multi-repositorio, a partir de commits e PRs reais (Git + GitHub API)",
   "scripts": {
-    "analyze": "tsx src/index.ts"
+    "analyze": "tsx src/index.ts",
+    "people": "tsx src/cli/people.ts",
+    "discover": "tsx src/cli/discover.ts"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

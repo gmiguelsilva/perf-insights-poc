@@ -14,11 +14,13 @@ import { analyzeCommitsCodeQuality } from "./analyzers/codeQuality.js";
 import { computeCommitBaseline, computePrBaseline } from "./analyzers/repoBaseline.js";
 import { buildPersonTimelines, type RepoData } from "./timeline.js";
 import { buildDashboardHtml } from "./report/buildDashboard.js";
+import { loadRepoCache, saveRepoCache } from "./cache.js";
 import type { DevReport, GitCommit, RepoBaseline } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 const CONFIG_PATH = path.join(PROJECT_ROOT, "config", "tracked.json");
+const CACHE_DIR = path.join(PROJECT_ROOT, "data", "cache");
 
 async function main() {
   const filters = parseCliFilters(process.argv.slice(2));
@@ -51,7 +53,9 @@ async function main() {
     }
 
     console.log("Analisando qualidade de codigo (ESLint + complexidade) por commit...");
-    const snapshots = analyzeCommitsCodeQuality(repo.id, repo.absolutePath, commits);
+    const cache = loadRepoCache(CACHE_DIR, repo.id);
+    const snapshots = analyzeCommitsCodeQuality(repo.id, repo.absolutePath, commits, cache);
+    saveRepoCache(CACHE_DIR, repo.id, cache);
 
     let prs: ReturnType<typeof collectPullRequests> = [];
     if (repo.github) {

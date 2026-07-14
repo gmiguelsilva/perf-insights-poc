@@ -94,15 +94,32 @@ function analyzeComplexityForTree(worktreePath: string) {
  * por commit) e roda ESLint + a analise de complexidade sobre a arvore
  * inteira naquele ponto no tempo. Isso mede a saude do codigo-fonte como um
  * todo a cada iteracao, nao so o diff daquele commit.
+ *
+ * `cache` (sha -> snapshot ja calculado) evita reprocessar commits vistos em
+ * runs anteriores - essencial pra repos com historico grande. E mutado com
+ * as novas entradas calculadas nesta run, para o chamador persistir.
  */
-export function analyzeCommitsCodeQuality(repoId: string, repoPath: string, commits: GitCommit[]): CodeQualitySnapshot[] {
+export function analyzeCommitsCodeQuality(
+  repoId: string,
+  repoPath: string,
+  commits: GitCommit[],
+  cache: Record<string, CodeQualitySnapshot> = {},
+): CodeQualitySnapshot[] {
   const worktreesRoot = path.join(os.tmpdir(), "perf-insights-poc-worktrees");
   fs.mkdirSync(worktreesRoot, { recursive: true });
   const mainNodeModules = path.join(repoPath, "node_modules");
 
   const snapshots: CodeQualitySnapshot[] = [];
+  let cacheHits = 0;
 
   for (const commit of commits) {
+    const cached = cache[commit.sha];
+    if (cached) {
+      snapshots.push(cached);
+      cacheHits++;
+      continue;
+    }
+
     const worktreePath = path.join(worktreesRoot, `${repoId}-${commit.shortSha}`);
 
     if (fs.existsSync(worktreePath)) {
@@ -119,7 +136,7 @@ export function analyzeCommitsCodeQuality(repoId: string, repoPath: string, comm
     try {
       const lint = runEslint(worktreePath, repoPath);
       const complexity = analyzeComplexityForTree(worktreePath);
-      snapshots.push({
+      const snapshot: CodeQualitySnapshot = {
         repoId,
         commitSha: commit.sha,
         eslintErrors: lint.errors,
@@ -129,11 +146,17 @@ export function analyzeCommitsCodeQuality(repoId: string, repoPath: string, comm
         maxComplexity: complexity.maxComplexity,
         functionCount: complexity.functionCount,
         linesOfCode: complexity.linesOfCode,
-      });
+      };
+      snapshots.push(snapshot);
+      cache[commit.sha] = snapshot;
     } finally {
       fs.rmdirSync(worktreeNodeModules);
       execFileSync("git", ["worktree", "remove", "--force", worktreePath], { cwd: repoPath });
     }
+  }
+
+  if (cacheHits > 0) {
+    console.log(`  ${cacheHits}/${commits.length} commits reaproveitados do cache.`);
   }
 
   try {

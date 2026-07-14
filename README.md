@@ -26,6 +26,10 @@ desde o desenho:
 - **Selecionar pessoas e repositórios** é de primeira classe: por flag de
   CLI na coleta (`--people`, `--repos`) e por checkboxes no próprio
   dashboard (filtra o gráfico/tabela sem precisar rodar de novo).
+- **Adicionar/remover um dev do time é um comando, não uma edição manual de
+  JSON** (`npm run people -- add/remove/list`), e `npm run discover` acha
+  identidades de commit/PR que ainda não batem com ninguém cadastrado — ver
+  seção "Adicionar ou remover um dev" abaixo.
 
 QA e Funcional foram deliberadamente deixados de fora desta rodada — a
 versão anterior tinha personas simuladas para provar o layout visual, mas
@@ -99,6 +103,49 @@ Isso gera `data/aggregated.json` (dados brutos) e `dist/dashboard.html`
 (dashboard autocontido, sem dependências externas, funciona offline,
 respeita tema claro/escuro).
 
+A análise de código (`git worktree` + ESLint) fica em cache por commit em
+`data/cache/<repo>.json` (fora do Git) — a primeira rodada de um
+repositório é cara, as próximas só analisam commits novos. Numa rodada
+local de teste, `gd-crm-poc` (7 commits) caiu de ~90s para ~4s na segunda
+execução.
+
+## Adicionar ou remover um dev
+
+Editar `config/tracked.json` na mão funciona, mas erra fácil (duplicar id,
+esquecer um email, JSON inválido). Os comandos abaixo cuidam disso:
+
+```bash
+# ver quem está cadastrado
+npm run people -- list
+
+# cadastrar alguém novo
+npm run people -- add --id joao-souza --name "João Souza" --email joao@empresa.com --github joaosouza
+
+# a mesma pessoa commitando com outro email (comum: pessoal vs. corporativo,
+# ou noreply do GitHub) - roda de novo com o mesmo --id, só adiciona a identidade
+npm run people -- add --id joao-souza --email 12345+joaosouza@users.noreply.github.com --git-name joaosouza
+
+# tirar alguém (ex.: saiu do time) - o histórico de commits dele continua
+# no Git, só passa a aparecer como "identidade não mapeada" nas próximas execuções
+npm run people -- remove --id joao-souza
+```
+
+**Não sabe todas as identidades git de alguém?** É comum não saber de cara —
+o mesmo dev aparece com nome/email diferentes em cada repositório. Para
+isso existe:
+
+```bash
+npm run discover
+```
+
+Ele varre todos os repositórios configurados, lista quem commitou (e quem
+abriu PR, se o repo tem GitHub configurado) e que **ainda não bate com
+ninguém** em `config/tracked.json` — com sugestão de comando pronto pra
+copiar e colar: se o nome for parecido com alguém já cadastrado, sugere
+adicionar como mais uma identidade dessa pessoa; senão, sugere cadastrar
+como pessoa nova. Rode isso sempre que adicionar um repositório novo ou
+sentir que alguém "sumiu" do dashboard.
+
 ## Configuração (`config/tracked.json`)
 
 ```json
@@ -133,10 +180,13 @@ respeita tema claro/escuro).
 config/tracked.json               pessoas, identidades git, repositórios rastreados
 src/
   config.ts                       carrega config, resolve identidade, filtros de CLI
+  cache.ts                        cache incremental de análise de código por commit (data/cache/)
+  cli/people.ts                    npm run people -- list/add/remove
+  cli/discover.ts                  npm run discover - acha identidades não mapeadas nos repos
   collectors/gitCollector.ts       git log --numstat -> commits com personId resolvido
   collectors/githubPrCollector.ts  gh api -> PRs com personId resolvido (tolerante a repo sem PR)
   analyzers/complexity.ts         heurística de complexidade via AST do TypeScript
-  analyzers/codeQuality.ts        orquestra git worktree + ESLint + complexidade por commit
+  analyzers/codeQuality.ts        orquestra git worktree + ESLint + complexidade por commit (com cache)
   analyzers/repoBaseline.ts       média/desvio-padrão por repo -> signal 0-100 normalizado
   timeline.ts                     funde commits+PRs de todos os repos por pessoa, calcula score
   report/buildDashboard.ts        injeta o JSON agregado no template do dashboard
@@ -144,6 +194,7 @@ src/
   synthetic/                      (legado) personas de QA/Funcional da fase anterior - não usado hoje
 dashboard/template.html           dashboard estático (SVG + vanilla JS, sem libs externas)
 data/aggregated.json              saída da última execução (gerado)
+data/cache/                       cache de análise por commit, por repo (gerado, fora do Git)
 dist/dashboard.html               dashboard final (gerado)
 ```
 
@@ -156,10 +207,14 @@ dist/dashboard.html               dashboard final (gerado)
 - O baseline por repo (z-score) fica instável com poucos commits/PRs — com
   amostras pequenas, quase tudo tende a `signal ≈ 50` (pouco desvio-padrão
   para comparar). Fica mais informativo à medida que o histórico cresce.
-- Roda `git worktree` + ESLint para **cada commit do histórico inteiro**
-  toda vez que analisa um repo — funciona bem para os repos pequenos desta
-  POC, mas não escala para um repositório com milhares de commits sem
-  amostragem/cache incremental.
+- O cache acelera reprocessamento (commits já vistos não rodam ESLint de
+  novo), mas a primeira análise de um repositório grande ainda percorre o
+  histórico inteiro uma vez — não há amostragem/janela de tempo ainda.
+- `npm run discover` sugere correspondências por similaridade de nome
+  (Levenshtein) — funciona bem pra "Joao Silva" vs "joaosilva", mas não
+  identifica automaticamente, por exemplo, um apelido completamente
+  diferente do nome cadastrado; nesse caso o cadastro manual continua
+  necessário.
 
 ## Roadmap
 

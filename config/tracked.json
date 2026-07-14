@@ -4,10 +4,18 @@
       "personId": "miguel-silva",
       "name": "Miguel Silva",
       "gitIdentities": [
-        { "name": "miguelsilvag", "email": "miguel09eduardo09@gmail.com" },
-        { "name": "miguelsilvag", "email": "125837411+miguelsilvag@users.noreply.github.com" }
+        {
+          "name": "miguelsilvag",
+          "email": "miguel09eduardo09@gmail.com"
+        },
+        {
+          "name": "miguelsilvag",
+          "email": "125837411+miguelsilvag@users.noreply.github.com"
+        }
       ],
-      "githubLogins": ["gmiguelsilva"]
+      "githubLogins": [
+        "gmiguelsilva"
+      ]
     }
   ],
   "repos": [
