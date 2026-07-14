@@ -95,7 +95,7 @@ function analyzeComplexityForTree(worktreePath: string) {
  * inteira naquele ponto no tempo. Isso mede a saude do codigo-fonte como um
  * todo a cada iteracao, nao so o diff daquele commit.
  */
-export function analyzeCommitsCodeQuality(repoPath: string, commits: GitCommit[]): CodeQualitySnapshot[] {
+export function analyzeCommitsCodeQuality(repoId: string, repoPath: string, commits: GitCommit[]): CodeQualitySnapshot[] {
   const worktreesRoot = path.join(os.tmpdir(), "perf-insights-poc-worktrees");
   fs.mkdirSync(worktreesRoot, { recursive: true });
   const mainNodeModules = path.join(repoPath, "node_modules");
@@ -103,7 +103,7 @@ export function analyzeCommitsCodeQuality(repoPath: string, commits: GitCommit[]
   const snapshots: CodeQualitySnapshot[] = [];
 
   for (const commit of commits) {
-    const worktreePath = path.join(worktreesRoot, commit.shortSha);
+    const worktreePath = path.join(worktreesRoot, `${repoId}-${commit.shortSha}`);
 
     if (fs.existsSync(worktreePath)) {
       fs.rmSync(worktreePath, { recursive: true, force: true });
@@ -120,6 +120,7 @@ export function analyzeCommitsCodeQuality(repoPath: string, commits: GitCommit[]
       const lint = runEslint(worktreePath, repoPath);
       const complexity = analyzeComplexityForTree(worktreePath);
       snapshots.push({
+        repoId,
         commitSha: commit.sha,
         eslintErrors: lint.errors,
         eslintWarnings: lint.warnings,

@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { AggregatedReport } from "../types.js";
+import type { DevReport } from "../types.js";
 
 const START_MARK = "/*__REPORT_DATA__*/";
 const END_MARK = "/*__END_REPORT_DATA__*/";
 
-export function buildDashboardHtml(report: AggregatedReport, templatePath: string, outputPath: string): void {
+export function buildDashboardHtml(report: DevReport, templatePath: string, outputPath: string): void {
   const template = fs.readFileSync(templatePath, "utf-8");
   const startIdx = template.indexOf(START_MARK);
   const endIdx = template.indexOf(END_MARK);

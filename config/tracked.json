@@ -1,0 +1,20 @@
+{
+  "people": [
+    {
+      "personId": "miguel-silva",
+      "name": "Miguel Silva",
+      "gitIdentities": [
+        { "name": "miguelsilvag", "email": "miguel09eduardo09@gmail.com" },
+        { "name": "miguelsilvag", "email": "125837411+miguelsilvag@users.noreply.github.com" }
+      ],
+      "githubLogins": ["gmiguelsilva"]
+    }
+  ],
+  "repos": [
+    {
+      "id": "gd-crm-poc",
+      "path": "../../gd-crm-poc",
+      "github": "gmiguelsilva/gd-crm-poc"
+    }
+  ]
+}

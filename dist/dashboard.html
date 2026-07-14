@@ -1,4 +1,4 @@
-<title>Perf Insights POC</title>
+<title>Perf Insights POC — Dev</title>
 <style>
   .pi-root {
     --surface-1: #fcfcfb;
@@ -10,11 +10,14 @@
     --baseline: #c3c2b7;
     --good: #006300;
     --border: rgba(11, 11, 11, 0.10);
-    --series-dev: #2a78d6;
-    --series-qa-1: #1baf7a;
-    --series-qa-2: #eda100;
-    --series-func-1: #4a3aa7;
-    --series-func-2: #e34948;
+    --series-1: #2a78d6;
+    --series-2: #1baf7a;
+    --series-3: #eda100;
+    --series-4: #008300;
+    --series-5: #4a3aa7;
+    --series-6: #e34948;
+    --series-7: #e87ba4;
+    --series-8: #eb6834;
     --status-good: #0ca30c;
     --status-warning: #fab219;
     --status-serious: #ec835a;
@@ -22,85 +25,70 @@
   }
   @media (prefers-color-scheme: dark) {
     .pi-root {
-      --surface-1: #1a1a19;
-      --page: #0d0d0d;
-      --text-primary: #ffffff;
-      --text-secondary: #c3c2b7;
-      --text-muted: #898781;
-      --gridline: #2c2c2a;
-      --baseline: #383835;
-      --good: #0ca30c;
+      --surface-1: #1a1a19; --page: #0d0d0d; --text-primary: #ffffff; --text-secondary: #c3c2b7;
+      --text-muted: #898781; --gridline: #2c2c2a; --baseline: #383835; --good: #0ca30c;
       --border: rgba(255, 255, 255, 0.10);
-      --series-dev: #3987e5;
-      --series-qa-1: #199e70;
-      --series-qa-2: #c98500;
-      --series-func-1: #9085e9;
-      --series-func-2: #e66767;
+      --series-1: #3987e5; --series-2: #199e70; --series-3: #c98500; --series-4: #008300;
+      --series-5: #9085e9; --series-6: #e66767; --series-7: #d55181; --series-8: #d95926;
     }
   }
   :root[data-theme="dark"] .pi-root {
     --surface-1: #1a1a19; --page: #0d0d0d; --text-primary: #ffffff; --text-secondary: #c3c2b7;
     --text-muted: #898781; --gridline: #2c2c2a; --baseline: #383835; --good: #0ca30c;
-    --border: rgba(255, 255, 255, 0.10); --series-dev: #3987e5; --series-qa-1: #199e70;
-    --series-qa-2: #c98500; --series-func-1: #9085e9; --series-func-2: #e66767;
+    --border: rgba(255, 255, 255, 0.10);
+    --series-1: #3987e5; --series-2: #199e70; --series-3: #c98500; --series-4: #008300;
+    --series-5: #9085e9; --series-6: #e66767; --series-7: #d55181; --series-8: #d95926;
   }
   :root[data-theme="light"] .pi-root {
     --surface-1: #fcfcfb; --page: #f9f9f7; --text-primary: #0b0b0b; --text-secondary: #52514e;
     --text-muted: #898781; --gridline: #e1e0d9; --baseline: #c3c2b7; --good: #006300;
-    --border: rgba(11, 11, 11, 0.10); --series-dev: #2a78d6; --series-qa-1: #1baf7a;
-    --series-qa-2: #eda100; --series-func-1: #4a3aa7; --series-func-2: #e34948;
+    --border: rgba(11, 11, 11, 0.10);
+    --series-1: #2a78d6; --series-2: #1baf7a; --series-3: #eda100; --series-4: #008300;
+    --series-5: #4a3aa7; --series-6: #e34948; --series-7: #e87ba4; --series-8: #eb6834;
   }
 
   .pi-root {
-    background: var(--page);
-    color: var(--text-primary);
+    background: var(--page); color: var(--text-primary);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    padding: 32px clamp(16px, 4vw, 48px) 64px;
-    max-width: 1180px;
-    margin: 0 auto;
+    padding: 32px clamp(16px, 4vw, 48px) 64px; max-width: 1180px; margin: 0 auto;
   }
   .pi-root h1 { font-size: 24px; margin: 0 0 4px; }
   .pi-sub { color: var(--text-secondary); font-size: 14px; margin: 0 0 4px; }
-  .pi-note { color: var(--text-muted); font-size: 12.5px; margin: 0 0 24px; }
-  .pi-legend-badges { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
-  .pi-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 12.5px; color: var(--text-secondary);
-    border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
-    background: var(--surface-1);
-  }
-  .pi-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .pi-note { color: var(--text-muted); font-size: 12.5px; margin: 0 0 20px; }
 
-  .pi-stat-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 12px; margin-bottom: 36px;
-  }
-  .pi-stat-tile {
+  .pi-filters {
+    display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start;
     background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px;
+    padding: 14px 18px; margin-bottom: 24px;
   }
+  .pi-filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .pi-filter-group .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 2px; }
+  .pi-filter-option { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .pi-filter-option input { accent-color: var(--series-1); }
+  .pi-filter-option .sw { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  .pi-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .pi-stat-tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
   .pi-stat-tile .role { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
   .pi-stat-tile .name { font-size: 13.5px; color: var(--text-secondary); margin: 2px 0 8px; }
   .pi-stat-tile .value { font-size: 30px; font-weight: 600; line-height: 1; }
   .pi-stat-tile .delta { font-size: 12.5px; margin-top: 6px; font-weight: 500; }
-  .pi-stat-tile .origin { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; }
+  .pi-stat-tile .repos { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; }
 
-  .pi-section { margin-bottom: 40px; }
+  .pi-section { margin-bottom: 36px; }
   .pi-section h2 { font-size: 16px; margin: 0 0 2px; }
   .pi-section .desc { font-size: 12.5px; color: var(--text-muted); margin: 0 0 14px; }
-  .pi-chart-card {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
-    padding: 18px 20px 12px; position: relative;
-  }
+  .pi-chart-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px 12px; position: relative; }
   .pi-chart-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
   .pi-chart-legend .item { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
   .pi-chart-legend .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .pi-chart-legend .marker-key { display: flex; gap: 14px; margin-left: auto; color: var(--text-muted); font-size: 11.5px; }
+  .pi-chart-legend .marker-key span { display: inline-flex; align-items: center; gap: 5px; }
 
   .pi-tooltip {
-    position: absolute; pointer-events: none; background: var(--surface-1);
-    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
-    font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: none; z-index: 5;
-    min-width: 150px;
+    position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    display: none; z-index: 5; min-width: 190px; max-width: 260px;
   }
   .pi-tooltip .t-title { color: var(--text-muted); font-size: 11px; margin-bottom: 4px; }
   .pi-tooltip .t-row { display: flex; justify-content: space-between; gap: 12px; }
@@ -108,6 +96,7 @@
   .pi-tooltip .t-label { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
   .pi-tooltip .t-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
   .pi-tooltip .t-val { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .pi-tooltip .t-msg { color: var(--text-muted); font-size: 11px; margin-top: 4px; word-break: break-word; }
 
   table.pi-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   table.pi-table caption { text-align: left; font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px; caption-side: top; }
@@ -116,103 +105,136 @@
   table.pi-table td.num, table.pi-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .pi-details { margin-top: 10px; }
   .pi-details summary { cursor: pointer; font-size: 12.5px; color: var(--text-secondary); padding: 4px 0; }
+  .pi-empty { font-size: 13px; color: var(--text-muted); padding: 24px; text-align: center; }
 
   .pi-footer { border-top: 1px solid var(--border); margin-top: 40px; padding-top: 16px; font-size: 12px; color: var(--text-muted); }
   .pi-footer p { margin: 0 0 6px; }
+  .pi-warn { color: var(--status-serious); }
 
   .axis-label { fill: var(--text-muted); font-size: 10.5px; font-family: system-ui, sans-serif; }
   .gridline { stroke: var(--gridline); stroke-width: 1; }
-  .baseline { stroke: var(--baseline); stroke-width: 1; }
+  .baseline-line { stroke: var(--baseline); stroke-width: 1; }
 </style>
 
 <div class="pi-root" id="pi-root">
-  <h1>Perf Insights &mdash; POC de evolução de desempenho</h1>
+  <h1>Perf Insights — Evolução de Dev (multi-repositório)</h1>
   <p class="pi-sub" id="pi-subtitle"></p>
   <p class="pi-note">
-    Score de 0 a 100 por papel, calculado a partir das métricas abaixo. Eixo X = iteração (sequência de commits/sprints), não data de calendário.
+    Cada ponto é um evento real (commit ou PR), ordenado por data/hora — inclusive entre repositórios diferentes. Score = média móvel do "signal" dos últimos eventos; signal é a qualidade daquele evento comparada à própria média histórica do repositório (50 = igual à média do repo).
   </p>
 
-  <div class="pi-legend-badges">
-    <span class="pi-badge"><span class="pi-dot" style="background:var(--status-good)"></span>Dev: dados reais extraídos do repositório Git (ESLint + complexidade por commit)</span>
-    <span class="pi-badge"><span class="pi-dot" style="background:var(--status-warning)"></span>QA / Funcional: personas sintéticas ilustrativas (ainda sem fonte real conectada)</span>
-  </div>
+  <div class="pi-filters" id="pi-filters"></div>
 
   <div class="pi-stat-grid" id="pi-stats"></div>
 
   <div id="pi-sections"></div>
 
-  <div class="pi-footer">
-    <p><strong>Metodologia (POC):</strong> a complexidade é uma heurística de AST (pontos de decisão por função), não uma ferramenta de complexidade consolidada. Os dados de QA e Funcional são gerados por seed determinística para provar o conceito visual — ainda não vêm de Jira/GitHub Issues/TestRail reais.</p>
-    <p>Gerado em <span id="pi-generated-at"></span> a partir de <span id="pi-source-repo"></span>.</p>
-  </div>
+  <div class="pi-footer" id="pi-footer"></div>
 </div>
 
 <script>
 (function () {
-  var REPORT = /*__REPORT_DATA__*/{"generatedAt":"2026-07-14T00:43:14.500Z","sourceRepo":"C:\\Users\\Miguel\\gd-crm-poc","people":[{"personId":"dev-main","name":"miguelsilvag (Dev)","role":"dev","origin":"real","iterations":[{"iteration":0,"iterationLabel":"Iteração 1","score":100,"note":"Initial commit from Create Next App"},{"iteration":1,"iterationLabel":"Iteração 2","score":96,"note":"Estrutura inicial da PoC de GD: dashboard, pipeline, clientes, usinas, UCs e contratos"},{"iteration":2,"iterationLabel":"Iteração 3","score":94,"note":"Adiciona formularios (Server Actions), paginas de detalhe e grafico de geracao"},{"iteration":3,"iterationLabel":"Iteração 4","score":93,"note":"Adiciona autenticacao (login/logout) e tela de perfil do usuario"},{"iteration":4,"iterationLabel":"Iteração 5","score":93,"note":"Versiona .env.example para documentar variaveis de ambiente necessarias"},{"iteration":5,"iterationLabel":"Iteração 6","score":93,"note":"Adiciona motor de Rateio de Energia e Dashboard Executivo (baseado no Veo-Sales)"},{"iteration":6,"iterationLabel":"Iteração 7","score":93,"note":"Adiciona Portal do Cliente (self-service), inspirado no ClientPortal do Veo-Sales"}],"raw":[{"linesAdded":7008,"linesRemoved":0,"filesChanged":19,"eslintErrors":0,"eslintWarnings":0,"issuesPerKloc":0,"avgComplexity":1,"maxComplexity":1},{"linesAdded":11793,"linesRemoved":3661,"filesChanged":36,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":1.5,"avgComplexity":1.44,"maxComplexity":9},{"linesAdded":3110,"linesRemoved":43,"filesChanged":33,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":0.83,"avgComplexity":2.17,"maxComplexity":32},{"linesAdded":571,"linesRemoved":24,"filesChanged":26,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":0.76,"avgComplexity":2.22,"maxComplexity":32},{"linesAdded":6,"linesRemoved":0,"filesChanged":2,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":0.76,"avgComplexity":2.22,"maxComplexity":32},{"linesAdded":3802,"linesRemoved":414,"filesChanged":34,"eslintErrors":1,"eslintWarnings":3,"issuesPerKloc":0.4,"avgComplexity":2.41,"maxComplexity":45},{"linesAdded":1058,"linesRemoved":2,"filesChanged":24,"eslintErrors":1,"eslintWarnings":3,"issuesPerKloc":0.37,"avgComplexity":2.43,"maxComplexity":45}]},{"personId":"qa-camila","name":"Camila Nunes (QA)","role":"qa","origin":"simulado","iterations":[{"iteration":0,"iterationLabel":"Iteração 1","score":57},{"iteration":1,"iterationLabel":"Iteração 2","score":50},{"iteration":2,"iterationLabel":"Iteração 3","score":53},{"iteration":3,"iterationLabel":"Iteração 4","score":59},{"iteration":4,"iterationLabel":"Iteração 5","score":64},{"iteration":5,"iterationLabel":"Iteração 6","score":84},{"iteration":6,"iterationLabel":"Iteração 7","score":71}],"raw":[{"bugsFound":13,"escapedDefects":5,"testCasesWritten":6,"reviewComments":9,"avgReviewTurnaroundHours":11.2},{"bugsFound":6,"escapedDefects":5,"testCasesWritten":11,"reviewComments":7,"avgReviewTurnaroundHours":8.4},{"bugsFound":12,"escapedDefects":4,"testCasesWritten":13,"reviewComments":5,"avgReviewTurnaroundHours":16.2},{"bugsFound":10,"escapedDefects":4,"testCasesWritten":13,"reviewComments":7,"avgReviewTurnaroundHours":9.2},{"bugsFound":9,"escapedDefects":3,"testCasesWritten":7,"reviewComments":7,"avgReviewTurnaroundHours":7.2},{"bugsFound":18,"escapedDefects":2,"testCasesWritten":14,"reviewComments":12,"avgReviewTurnaroundHours":5.7},{"bugsFound":9,"escapedDefects":1,"testCasesWritten":13,"reviewComments":12,"avgReviewTurnaroundHours":8.4}]},{"personId":"qa-bruno","name":"Bruno Alves (QA)","role":"qa","origin":"simulado","iterations":[{"iteration":0,"iterationLabel":"Iteração 1","score":52},{"iteration":1,"iterationLabel":"Iteração 2","score":35},{"iteration":2,"iterationLabel":"Iteração 3","score":59},{"iteration":3,"iterationLabel":"Iteração 4","score":51},{"iteration":4,"iterationLabel":"Iteração 5","score":44},{"iteration":5,"iterationLabel":"Iteração 6","score":37},{"iteration":6,"iterationLabel":"Iteração 7","score":48}],"raw":[{"bugsFound":10,"escapedDefects":6,"testCasesWritten":7,"reviewComments":4,"avgReviewTurnaroundHours":8.4},{"bugsFound":9,"escapedDefects":8,"testCasesWritten":12,"reviewComments":10,"avgReviewTurnaroundHours":13.8},{"bugsFound":9,"escapedDefects":4,"testCasesWritten":12,"reviewComments":4,"avgReviewTurnaroundHours":8.6},{"bugsFound":8,"escapedDefects":5,"testCasesWritten":12,"reviewComments":6,"avgReviewTurnaroundHours":10},{"bugsFound":10,"escapedDefects":5,"testCasesWritten":7,"reviewComments":7,"avgReviewTurnaroundHours":17.2},{"bugsFound":10,"escapedDefects":7,"testCasesWritten":10,"reviewComments":5,"avgReviewTurnaroundHours":16.4},{"bugsFound":13,"escapedDefects":8,"testCasesWritten":12,"reviewComments":8,"avgReviewTurnaroundHours":8.8}]},{"personId":"func-renata","name":"Renata Ferraz (Funcional)","role":"funcional","origin":"simulado","iterations":[{"iteration":0,"iterationLabel":"Iteração 1","score":56},{"iteration":1,"iterationLabel":"Iteração 2","score":61},{"iteration":2,"iterationLabel":"Iteração 3","score":50},{"iteration":3,"iterationLabel":"Iteração 4","score":50},{"iteration":4,"iterationLabel":"Iteração 5","score":63},{"iteration":5,"iterationLabel":"Iteração 6","score":69},{"iteration":6,"iterationLabel":"Iteração 7","score":75}],"raw":[{"requirementsWritten":8,"clarificationRequests":2,"reworkCausedPct":15.2,"stakeholderApprovalDays":2.9},{"requirementsWritten":7,"clarificationRequests":4,"reworkCausedPct":8,"stakeholderApprovalDays":2.5},{"requirementsWritten":5,"clarificationRequests":3,"reworkCausedPct":18.2,"stakeholderApprovalDays":2.7},{"requirementsWritten":7,"clarificationRequests":4,"reworkCausedPct":13.3,"stakeholderApprovalDays":3.1},{"requirementsWritten":6,"clarificationRequests":1,"reworkCausedPct":13.3,"stakeholderApprovalDays":2.9},{"requirementsWritten":4,"clarificationRequests":2,"reworkCausedPct":7.4,"stakeholderApprovalDays":2.5},{"requirementsWritten":7,"clarificationRequests":2,"reworkCausedPct":6.5,"stakeholderApprovalDays":1.9}]},{"personId":"func-diego","name":"Diego Prado (Funcional)","role":"funcional","origin":"simulado","iterations":[{"iteration":0,"iterationLabel":"Iteração 1","score":52},{"iteration":1,"iterationLabel":"Iteração 2","score":57},{"iteration":2,"iterationLabel":"Iteração 3","score":29},{"iteration":3,"iterationLabel":"Iteração 4","score":51},{"iteration":4,"iterationLabel":"Iteração 5","score":57},{"iteration":5,"iterationLabel":"Iteração 6","score":26},{"iteration":6,"iterationLabel":"Iteração 7","score":39}],"raw":[{"requirementsWritten":6,"clarificationRequests":3,"reworkCausedPct":23.7,"stakeholderApprovalDays":1.3},{"requirementsWritten":4,"clarificationRequests":5,"reworkCausedPct":8.8,"stakeholderApprovalDays":2.4},{"requirementsWritten":4,"clarificationRequests":7,"reworkCausedPct":27.2,"stakeholderApprovalDays":1.8},{"requirementsWritten":5,"clarificationRequests":6,"reworkCausedPct":13.6,"stakeholderApprovalDays":1.8},{"requirementsWritten":3,"clarificationRequests":5,"reworkCausedPct":14.8,"stakeholderApprovalDays":1.2},{"requirementsWritten":3,"clarificationRequests":7,"reworkCausedPct":28.9,"stakeholderApprovalDays":1.9},{"requirementsWritten":5,"clarificationRequests":4,"reworkCausedPct":30.3,"stakeholderApprovalDays":1.4}]}]}/*__END_REPORT_DATA__*/;
+  var REPORT = /*__REPORT_DATA__*/{"generatedAt":"2026-07-14T02:38:27.494Z","repos":[{"id":"gd-crm-poc","github":"gmiguelsilva/gd-crm-poc","commitCount":7,"prCount":0}],"people":[{"personId":"miguel-silva","name":"Miguel Silva","reposTouched":["gd-crm-poc"],"events":[{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-02T22:48:40-03:00","sha":"e50e5e5e47a5980bf34c4e8f77b3799634cffe4e","shortSha":"e50e5e5","message":"Initial commit from Create Next App","linesAdded":7008,"linesRemoved":0,"filesChanged":19,"eslintErrors":0,"eslintWarnings":0,"issuesPerKloc":0,"avgComplexity":1,"signal":75.2,"score":75},{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-02T23:21:56-03:00","sha":"a43767c65d92260539298d64b00d7d05adaf1122","shortSha":"a43767c","message":"Estrutura inicial da PoC de GD: dashboard, pipeline, clientes, usinas, UCs e contratos","linesAdded":11793,"linesRemoved":3661,"filesChanged":36,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":1.5,"avgComplexity":1.44,"signal":39.2,"score":57},{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-02T23:44:30-03:00","sha":"553106e1af9fda217649e38e2ec9a2b43b26f6f7","shortSha":"553106e","message":"Adiciona formularios (Server Actions), paginas de detalhe e grafico de geracao","linesAdded":3110,"linesRemoved":43,"filesChanged":33,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":0.83,"avgComplexity":2.17,"signal":44.4,"score":53},{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-03T00:00:43-03:00","sha":"4b65ed819237fef785df0635d9fe830b1eba8e40","shortSha":"4b65ed8","message":"Adiciona autenticacao (login/logout) e tela de perfil do usuario","linesAdded":571,"linesRemoved":24,"filesChanged":26,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":0.76,"avgComplexity":2.22,"signal":45.1,"score":51},{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-03T00:01:13-03:00","sha":"e1ca549c66bcc3d507b1e713ab36d855515a2481","shortSha":"e1ca549","message":"Versiona .env.example para documentar variaveis de ambiente necessarias","linesAdded":6,"linesRemoved":0,"filesChanged":2,"eslintErrors":1,"eslintWarnings":4,"issuesPerKloc":0.76,"avgComplexity":2.22,"signal":45.1,"score":50},{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-03T01:05:57-03:00","sha":"da11bf2e2a4f366c567f21bc26df4833beb6dad1","shortSha":"da11bf2","message":"Adiciona motor de Rateio de Energia e Dashboard Executivo (baseado no Veo-Sales)","linesAdded":3802,"linesRemoved":414,"filesChanged":34,"eslintErrors":1,"eslintWarnings":3,"issuesPerKloc":0.4,"avgComplexity":2.41,"signal":50.2,"score":45},{"type":"commit","personId":"miguel-silva","repoId":"gd-crm-poc","timestamp":"2026-07-03T11:12:37-03:00","sha":"ef5183414bf59186df9dbfb5b8ed6ddf0f948a61","shortSha":"ef51834","message":"Adiciona Portal do Cliente (self-service), inspirado no ClientPortal do Veo-Sales","linesAdded":1058,"linesRemoved":2,"filesChanged":24,"eslintErrors":1,"eslintWarnings":3,"issuesPerKloc":0.37,"avgComplexity":2.43,"signal":50.8,"score":47}]}],"unmatchedIdentities":[]}/*__END_REPORT_DATA__*/;
 
-  var COLOR_VAR = {
-    "dev-main": "--series-dev",
-    "qa-camila": "--series-qa-1",
-    "qa-bruno": "--series-qa-2",
-    "func-renata": "--series-func-1",
-    "func-diego": "--series-func-2"
-  };
+  var COLOR_SLOTS = ["--series-1", "--series-2", "--series-3", "--series-4", "--series-5", "--series-6", "--series-7", "--series-8"];
+  var colorByPerson = {};
+  REPORT.people.forEach(function (p, i) { colorByPerson[p.personId] = COLOR_SLOTS[i % COLOR_SLOTS.length]; });
 
-  var ROLE_LABELS = {
-    dev: { title: "Desenvolvedores", desc: "Score combina densidade de problemas de lint por mil linhas (60%) e complexidade média das funções (40%). Dados reais do Git." },
-    qa: { title: "QAs", desc: "Score combina defeitos escapados (40%, invertido), bugs encontrados em revisão (30%) e agilidade de revisão (30%). Dados simulados." },
-    funcional: { title: "Funcionais", desc: "Score combina retrabalho causado (40%, invertido), pedidos de esclarecimento (30%, invertido) e tempo de aprovação (30%, invertido). Dados simulados." }
-  };
-
-  var METRIC_LABELS = {
-    linesAdded: "Linhas add.", linesRemoved: "Linhas rem.", filesChanged: "Arquivos",
-    eslintErrors: "Erros lint", eslintWarnings: "Avisos lint", issuesPerKloc: "Issues/KLOC",
-    avgComplexity: "Complex. média", maxComplexity: "Complex. máx",
-    bugsFound: "Bugs encontrados", escapedDefects: "Defeitos escapados", testCasesWritten: "Casos de teste",
-    reviewComments: "Comentários review", avgReviewTurnaroundHours: "Turnaround (h)",
-    requirementsWritten: "Requisitos escritos", clarificationRequests: "Pedidos de esclarec.",
-    reworkCausedPct: "Retrabalho (%)", stakeholderApprovalDays: "Aprovação (dias)"
+  var state = {
+    people: new Set(REPORT.people.map(function (p) { return p.personId; })),
+    repos: new Set(REPORT.repos.map(function (r) { return r.id; })),
   };
 
   function cssVar(name) {
     return getComputedStyle(document.getElementById("pi-root")).getPropertyValue(name).trim();
   }
+  function colorFor(personId) { return cssVar(colorByPerson[personId] || "--series-1"); }
+  function fmtDate(iso) { try { return new Date(iso).toLocaleString("pt-BR"); } catch (e) { return iso; } }
+  function fmtDateShort(iso) { try { return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }); } catch (e) { return iso; } }
 
-  function colorFor(personId) {
-    return cssVar(COLOR_VAR[personId] || "--series-dev");
-  }
-
-  function fmtDate(iso) {
-    try { return new Date(iso).toLocaleString("pt-BR"); } catch (e) { return iso; }
+  function visiblePeople() {
+    return REPORT.people
+      .filter(function (p) { return state.people.has(p.personId); })
+      .map(function (p) {
+        return Object.assign({}, p, {
+          events: p.events.filter(function (e) { return state.repos.has(e.repoId); }),
+        });
+      })
+      .filter(function (p) { return p.events.length > 0; });
   }
 
   function renderHeader() {
+    var totalEvents = REPORT.people.reduce(function (s, p) { return s + p.events.length; }, 0);
     document.getElementById("pi-subtitle").textContent =
-      REPORT.people.length + " pessoas acompanhadas · " + (REPORT.people[0] ? REPORT.people[0].iterations.length : 0) + " iterações";
-    document.getElementById("pi-generated-at").textContent = fmtDate(REPORT.generatedAt);
-    document.getElementById("pi-source-repo").textContent = REPORT.sourceRepo;
+      REPORT.people.length + " pessoa(s) · " + REPORT.repos.length + " repositório(s) · " + totalEvents + " eventos · gerado em " + fmtDate(REPORT.generatedAt);
   }
 
-  function renderStatTiles() {
+  function renderFilters() {
+    var root = document.getElementById("pi-filters");
+    root.innerHTML = "";
+
+    var peopleGroup = document.createElement("div");
+    peopleGroup.className = "pi-filter-group";
+    peopleGroup.innerHTML = '<span class="label">Pessoas</span>';
+    REPORT.people.forEach(function (p) {
+      var id = "person-" + p.personId;
+      var label = document.createElement("label");
+      label.className = "pi-filter-option";
+      label.setAttribute("for", id);
+      label.innerHTML =
+        '<input type="checkbox" id="' + id + '" ' + (state.people.has(p.personId) ? "checked" : "") + ' />' +
+        '<span class="sw" style="background:' + colorFor(p.personId) + '"></span>' + p.name;
+      label.querySelector("input").addEventListener("change", function (evt) {
+        if (evt.target.checked) state.people.add(p.personId); else state.people.delete(p.personId);
+        renderAll();
+      });
+      peopleGroup.appendChild(label);
+    });
+    root.appendChild(peopleGroup);
+
+    var reposGroup = document.createElement("div");
+    reposGroup.className = "pi-filter-group";
+    reposGroup.innerHTML = '<span class="label">Repositórios</span>';
+    REPORT.repos.forEach(function (r) {
+      var id = "repo-" + r.id;
+      var label = document.createElement("label");
+      label.className = "pi-filter-option";
+      label.setAttribute("for", id);
+      label.innerHTML =
+        '<input type="checkbox" id="' + id + '" ' + (state.repos.has(r.id) ? "checked" : "") + ' />' +
+        r.id + ' <span style="color:var(--text-muted)">(' + r.commitCount + ' commits, ' + r.prCount + ' PRs)</span>';
+      label.querySelector("input").addEventListener("change", function (evt) {
+        if (evt.target.checked) state.repos.add(r.id); else state.repos.delete(r.id);
+        renderAll();
+      });
+      reposGroup.appendChild(label);
+    });
+    root.appendChild(reposGroup);
+  }
+
+  function renderStatTiles(people) {
     var grid = document.getElementById("pi-stats");
     grid.innerHTML = "";
-    REPORT.people.forEach(function (person) {
-      var first = person.iterations[0];
-      var last = person.iterations[person.iterations.length - 1];
+    if (!people.length) {
+      grid.innerHTML = '<div class="pi-empty">Nenhuma pessoa/repositório selecionado.</div>';
+      return;
+    }
+    people.forEach(function (person) {
+      var first = person.events[0];
+      var last = person.events[person.events.length - 1];
       var delta = last.score - first.score;
       var deltaGood = delta >= 0;
       var tile = document.createElement("div");
       tile.className = "pi-stat-tile";
       tile.style.borderLeft = "3px solid " + colorFor(person.personId);
       tile.innerHTML =
-        '<div class="role">' + person.role + '</div>' +
+        '<div class="role">dev</div>' +
         '<div class="name">' + person.name + '</div>' +
         '<div class="value">' + last.score + '</div>' +
         '<div class="delta" style="color:' + (deltaGood ? cssVar("--status-good") : cssVar("--status-critical")) + '">' +
-          (delta >= 0 ? "▲ +" : "▼ ") + delta + " desde a Iteração 1" +
+          (delta >= 0 ? "▲ +" : "▼ ") + delta + " desde o 1º evento" +
         '</div>' +
-        '<div class="origin">' + (person.origin === "real" ? "● dados reais" : "○ dados simulados") + '</div>';
+        '<div class="repos">' + person.reposTouched.filter(function(r){return state.repos.has(r);}).join(", ") + '</div>';
       grid.appendChild(tile);
     });
   }
@@ -221,23 +243,25 @@
 
   function buildLineChart(container, people) {
     var width = container.clientWidth || 680;
-    var height = 260;
+    var height = 280;
     var padL = 34, padR = 16, padT = 16, padB = 28;
     var innerW = width - padL - padR;
     var innerH = height - padT - padB;
-    var iterations = people[0].iterations;
-    var n = iterations.length;
 
-    var xAt = function (i) { return padL + (n <= 1 ? 0 : (innerW * i) / (n - 1)); };
+    var allEvents = people.flatMap(function (p) { return p.events; });
+    var times = allEvents.map(function (e) { return new Date(e.timestamp).getTime(); });
+    var minT = Math.min.apply(null, times);
+    var maxT = Math.max.apply(null, times);
+    var span = maxT - minT || 1;
+
+    var xAt = function (t) { return padL + (innerW * (t - minT)) / span; };
     var yAt = function (v) { return padT + innerH - (innerH * v) / 100; };
 
     var svgNS = "http://www.w3.org/2000/svg";
     var svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("viewBox", "0 0 " + width + " " + height);
-    svg.setAttribute("width", "100%");
-    svg.setAttribute("height", height);
-    svg.style.display = "block";
-    svg.style.overflow = "visible";
+    svg.setAttribute("width", "100%"); svg.setAttribute("height", height);
+    svg.style.display = "block"; svg.style.overflow = "visible";
 
     niceTicks().forEach(function (tick) {
       var y = yAt(tick);
@@ -256,16 +280,15 @@
     var baseline = document.createElementNS(svgNS, "line");
     baseline.setAttribute("x1", padL); baseline.setAttribute("x2", width - padR);
     baseline.setAttribute("y1", padT + innerH); baseline.setAttribute("y2", padT + innerH);
-    baseline.setAttribute("class", "baseline");
+    baseline.setAttribute("class", "baseline-line");
     svg.appendChild(baseline);
 
-    iterations.forEach(function (it, i) {
-      if (i !== 0 && i !== n - 1 && i % Math.ceil(n / 6) !== 0) return;
+    [minT, maxT].forEach(function (t, i) {
       var label = document.createElementNS(svgNS, "text");
-      label.setAttribute("x", xAt(i)); label.setAttribute("y", height - 8);
-      label.setAttribute("text-anchor", i === 0 ? "start" : i === n - 1 ? "end" : "middle");
+      label.setAttribute("x", xAt(t)); label.setAttribute("y", height - 8);
+      label.setAttribute("text-anchor", i === 0 ? "start" : "end");
       label.setAttribute("class", "axis-label");
-      label.textContent = "It. " + (i + 1);
+      label.textContent = fmtDateShort(new Date(t).toISOString());
       svg.appendChild(label);
     });
 
@@ -278,28 +301,38 @@
 
     people.forEach(function (person) {
       var color = colorFor(person.personId);
-      var d = person.iterations.map(function (it, i) {
-        return (i === 0 ? "M" : "L") + xAt(i).toFixed(1) + " " + yAt(it.score).toFixed(1);
+      var d = person.events.map(function (e, i) {
+        return (i === 0 ? "M" : "L") + xAt(new Date(e.timestamp).getTime()).toFixed(1) + " " + yAt(e.score).toFixed(1);
       }).join(" ");
       var path = document.createElementNS(svgNS, "path");
-      path.setAttribute("d", d);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", color);
-      path.setAttribute("stroke-width", "2");
-      path.setAttribute("stroke-linejoin", "round");
-      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("d", d); path.setAttribute("fill", "none");
+      path.setAttribute("stroke", color); path.setAttribute("stroke-width", "2");
+      path.setAttribute("stroke-linejoin", "round"); path.setAttribute("stroke-linecap", "round");
       svg.appendChild(path);
 
-      person.iterations.forEach(function (it, i) {
-        if (i !== n - 1) return;
+      person.events.forEach(function (e, i) {
+        var cx = xAt(new Date(e.timestamp).getTime());
+        var cy = yAt(e.score);
         var ring = document.createElementNS(svgNS, "circle");
-        ring.setAttribute("cx", xAt(i)); ring.setAttribute("cy", yAt(it.score));
-        ring.setAttribute("r", 6); ring.setAttribute("fill", cssVar("--surface-1"));
+        ring.setAttribute("cx", cx); ring.setAttribute("cy", cy);
+        ring.setAttribute("r", i === person.events.length - 1 ? 6 : 4);
+        ring.setAttribute("fill", cssVar("--surface-1"));
         svg.appendChild(ring);
-        var dot = document.createElementNS(svgNS, "circle");
-        dot.setAttribute("cx", xAt(i)); dot.setAttribute("cy", yAt(it.score));
-        dot.setAttribute("r", 4); dot.setAttribute("fill", color);
-        svg.appendChild(dot);
+
+        if (e.type === "pr") {
+          var rect = document.createElementNS(svgNS, "rect");
+          var s = i === person.events.length - 1 ? 7 : 4.5;
+          rect.setAttribute("x", cx - s / 2); rect.setAttribute("y", cy - s / 2);
+          rect.setAttribute("width", s); rect.setAttribute("height", s);
+          rect.setAttribute("fill", color);
+          svg.appendChild(rect);
+        } else {
+          var dot = document.createElementNS(svgNS, "circle");
+          dot.setAttribute("cx", cx); dot.setAttribute("cy", cy);
+          dot.setAttribute("r", i === person.events.length - 1 ? 4 : 2.5);
+          dot.setAttribute("fill", color);
+          svg.appendChild(dot);
+        }
       });
     });
 
@@ -315,25 +348,35 @@
       var rect = svg.getBoundingClientRect();
       var scaleX = width / rect.width;
       var mx = (evt.clientX - rect.left) * scaleX;
-      var idx = Math.round(((mx - padL) / innerW) * (n - 1));
-      idx = Math.max(0, Math.min(n - 1, idx));
-      hoverLine.style.display = "";
-      hoverLine.setAttribute("x1", xAt(idx)); hoverLine.setAttribute("x2", xAt(idx));
+      var targetT = minT + ((mx - padL) / innerW) * span;
 
-      var rows = people.map(function (person) {
-        var it = person.iterations[idx];
-        return '<div class="t-row"><span class="t-label"><span class="t-dot" style="background:' + colorFor(person.personId) + '"></span>' + person.name + '</span><span class="t-val">' + it.score + '</span></div>';
-      }).join("");
-      tooltip.innerHTML = '<div class="t-title">' + people[0].iterations[idx].iterationLabel + '</div>' + rows;
+      var nearest = null, nearestDist = Infinity;
+      people.forEach(function (person) {
+        person.events.forEach(function (e) {
+          var t = new Date(e.timestamp).getTime();
+          var dist = Math.abs(t - targetT);
+          if (dist < nearestDist) { nearestDist = dist; nearest = { person: person, event: e, t: t }; }
+        });
+      });
+      if (!nearest) return;
+
+      hoverLine.style.display = "";
+      hoverLine.setAttribute("x1", xAt(nearest.t)); hoverLine.setAttribute("x2", xAt(nearest.t));
+
+      var e = nearest.event;
+      var typeLabel = e.type === "pr" ? ("PR #" + e.number) : ("commit " + e.shortSha);
+      var msg = e.type === "pr" ? e.title : e.message;
+      tooltip.innerHTML =
+        '<div class="t-title">' + fmtDate(e.timestamp) + ' · ' + e.repoId + ' · ' + typeLabel + '</div>' +
+        '<div class="t-row"><span class="t-label"><span class="t-dot" style="background:' + colorFor(nearest.person.personId) + '"></span>' + nearest.person.name + '</span><span class="t-val">score ' + e.score + '</span></div>' +
+        '<div class="t-row"><span class="t-label">signal do evento</span><span class="t-val">' + e.signal + '</span></div>' +
+        '<div class="t-msg">' + (msg || "").slice(0, 90) + '</div>';
       tooltip.style.display = "block";
-      var left = (rect.width * idx) / (n - 1);
-      tooltip.style.left = Math.min(Math.max(left, 0), rect.width - 170) + "px";
+      var left = ((rect.width * (nearest.t - minT)) / span);
+      tooltip.style.left = Math.min(Math.max(left, 0), rect.width - 220) + "px";
       tooltip.style.top = "0px";
     });
-    svg.addEventListener("mouseleave", function () {
-      hoverLine.style.display = "none";
-      tooltip.style.display = "none";
-    });
+    svg.addEventListener("mouseleave", function () { hoverLine.style.display = "none"; tooltip.style.display = "none"; });
   }
 
   function renderLegend(container, people) {
@@ -345,64 +388,91 @@
       item.innerHTML = '<span class="swatch" style="background:' + colorFor(person.personId) + '"></span>' + person.name;
       legend.appendChild(item);
     });
+    var markerKey = document.createElement("span");
+    markerKey.className = "marker-key";
+    markerKey.innerHTML = "<span>● commit</span><span>■ PR</span>";
+    legend.appendChild(markerKey);
     container.appendChild(legend);
   }
 
   function renderTable(container, people) {
-    var allKeys = [];
-    people.forEach(function (p) {
-      Object.keys(p.raw[0] || {}).forEach(function (k) { if (allKeys.indexOf(k) === -1) allKeys.push(k); });
+    var rows = [];
+    people.forEach(function (person) {
+      person.events.forEach(function (e) {
+        rows.push({ person: person, e: e });
+      });
     });
+    rows.sort(function (a, b) { return new Date(a.e.timestamp) - new Date(b.e.timestamp); });
+
     var details = document.createElement("details");
     details.className = "pi-details";
     var summary = document.createElement("summary");
-    summary.textContent = "Ver tabela de métricas brutas por iteração";
+    summary.textContent = "Ver tabela de eventos (" + rows.length + ")";
     details.appendChild(summary);
 
     var table = document.createElement("table");
     table.className = "pi-table";
-    var thead = "<thead><tr><th>Pessoa</th><th>Iteração</th>" + allKeys.map(function (k) { return '<th class="num">' + (METRIC_LABELS[k] || k) + "</th>"; }).join("") + "<th class=\"num\">Score</th></tr></thead>";
-    var rows = "";
-    people.forEach(function (person) {
-      person.iterations.forEach(function (it, i) {
-        var raw = person.raw[i] || {};
-        rows += "<tr><td>" + person.name + "</td><td>" + it.iterationLabel + "</td>" +
-          allKeys.map(function (k) { return '<td class="num">' + (raw[k] !== undefined ? raw[k] : "–") + "</td>"; }).join("") +
-          '<td class="num">' + it.score + "</td></tr>";
-      });
-    });
-    table.innerHTML = thead + "<tbody>" + rows + "</tbody>";
+    var thead = "<thead><tr><th>Pessoa</th><th>Data</th><th>Repo</th><th>Tipo</th><th>Descrição</th>" +
+      '<th class="num">Signal</th><th class="num">Score</th></tr></thead>';
+    var body = rows.map(function (r) {
+      var e = r.e;
+      var typeLabel = e.type === "pr" ? "PR #" + e.number : "commit " + e.shortSha;
+      var desc = (e.type === "pr" ? e.title : e.message) || "";
+      return "<tr><td>" + r.person.name + "</td><td>" + fmtDate(e.timestamp) + "</td><td>" + e.repoId + "</td><td>" + typeLabel + "</td><td>" + desc.slice(0, 70) + "</td>" +
+        '<td class="num">' + e.signal + '</td><td class="num">' + e.score + "</td></tr>";
+    }).join("");
+    table.innerHTML = thead + "<tbody>" + body + "</tbody>";
     details.appendChild(table);
     container.appendChild(details);
   }
 
-  function renderSections() {
+  function renderSections(people) {
     var root = document.getElementById("pi-sections");
     root.innerHTML = "";
-    ["dev", "qa", "funcional"].forEach(function (role) {
-      var people = REPORT.people.filter(function (p) { return p.role === role; });
-      if (!people.length) return;
-      var section = document.createElement("div");
-      section.className = "pi-section";
-      section.innerHTML = "<h2>" + ROLE_LABELS[role].title + "</h2><p class=\"desc\">" + ROLE_LABELS[role].desc + "</p>";
-      var card = document.createElement("div");
-      card.className = "pi-chart-card";
-      var chartDiv = document.createElement("div");
-      card.appendChild(chartDiv);
-      renderLegend(card, people);
-      renderTable(card, people);
-      section.appendChild(card);
-      root.appendChild(section);
-      buildLineChart(chartDiv, people);
-    });
+    if (!people.length) return;
+
+    var section = document.createElement("div");
+    section.className = "pi-section";
+    section.innerHTML = "<h2>Evolução (score por evento)</h2><p class=\"desc\">Linha por pessoa; marcador circular = commit, quadrado = PR. Passe o mouse para ver o evento exato.</p>";
+    var card = document.createElement("div");
+    card.className = "pi-chart-card";
+    var chartDiv = document.createElement("div");
+    card.appendChild(chartDiv);
+    renderLegend(card, people);
+    renderTable(card, people);
+    section.appendChild(card);
+    root.appendChild(section);
+    buildLineChart(chartDiv, people);
+  }
+
+  function renderFooter() {
+    var footer = document.getElementById("pi-footer");
+    var repoList = REPORT.repos.map(function (r) { return r.id + (r.github ? " (" + r.github + ")" : " (sem GitHub configurado)"); }).join(", ");
+    var html = "<p><strong>Repositórios analisados:</strong> " + repoList + "</p>" +
+      "<p><strong>Metodologia:</strong> signal do evento = 50 + desvio (em relação à média/desvio-padrão do próprio repositório) de issues de lint por mil linhas e complexidade (commits), ou velocidade de merge e pedidos de mudança em review (PRs). Score = média móvel dos últimos eventos dessa pessoa, cronologicamente, entre todos os repositórios selecionados.</p>";
+    if (REPORT.unmatchedIdentities && REPORT.unmatchedIdentities.length) {
+      var uniq = [];
+      var seen = {};
+      REPORT.unmatchedIdentities.forEach(function (u) {
+        var key = u.repoId + ":" + u.authorEmail;
+        if (seen[key]) return;
+        seen[key] = true;
+        uniq.push(u.authorName + " <" + u.authorEmail + "> em " + u.repoId);
+      });
+      html += '<p class="pi-warn">⚠ ' + uniq.length + " identidade(s) de autor não mapeada(s) em config/tracked.json (commits ignorados): " + uniq.join("; ") + "</p>";
+    }
+    footer.innerHTML = html;
   }
 
   function renderAll() {
+    var people = visiblePeople();
     renderHeader();
-    renderStatTiles();
-    renderSections();
+    renderStatTiles(people);
+    renderSections(people);
+    renderFooter();
   }
 
+  renderFilters();
   renderAll();
   window.addEventListener("resize", renderAll);
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);

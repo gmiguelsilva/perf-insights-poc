@@ -1,15 +1,18 @@
 import { execFileSync } from "node:child_process";
 import type { GitCommit, GitFileChange } from "../types.js";
+import { resolvePersonByGit, type TrackedConfig } from "../config.js";
 
 const COMMIT_MARK = "@@COMMIT@@";
 
 /**
  * Le o historico de um repositorio local via `git log --numstat` (do commit
- * mais antigo para o mais novo) e devolve uma lista estruturada de commits
- * com as linhas adicionadas/removidas por arquivo.
+ * mais antigo para o mais novo), resolve o autor de cada commit para uma
+ * pessoa rastreada (por email, depois por nome) e devolve os commits
+ * estruturados. Commits de autores nao mapeados no config ficam com
+ * `personId` indefinido e sao reportados separadamente pelo chamador.
  */
-export function collectCommits(repoPath: string): GitCommit[] {
-  const format = `${COMMIT_MARK}%H|%h|%an|%aI|%s`;
+export function collectCommits(repoId: string, repoPath: string, config: TrackedConfig): GitCommit[] {
+  const format = `${COMMIT_MARK}%H|%h|%an|%ae|%aI|%s`;
   const output = execFileSync(
     "git",
     ["log", "--reverse", `--pretty=format:${format}`, "--numstat"],
@@ -21,7 +24,7 @@ export function collectCommits(repoPath: string): GitCommit[] {
 
   for (const block of blocks) {
     const lines = block.split("\n").filter((l) => l.length > 0);
-    const [sha, shortSha, author, date, ...rest] = lines[0].split("|");
+    const [sha, shortSha, authorName, authorEmail, date, ...rest] = lines[0].split("|");
     const message = rest.join("|");
 
     const files: GitFileChange[] = [];
@@ -36,7 +39,19 @@ export function collectCommits(repoPath: string): GitCommit[] {
       });
     }
 
-    commits.push({ sha, shortSha, author, date, message, files });
+    const person = resolvePersonByGit(config, authorName, authorEmail);
+
+    commits.push({
+      repoId,
+      sha,
+      shortSha,
+      authorName,
+      authorEmail,
+      personId: person?.personId,
+      date,
+      message,
+      files,
+    });
   }
 
   return commits;
